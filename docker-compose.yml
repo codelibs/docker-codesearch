@@ -13,6 +13,8 @@ services:
       DOMAINS: 'codesearch.codelibs.org -> http://fess01:8080'
       STAGE: local
       # STAGE: production
+    networks:
+      - codesearch_net
     volumes:
       - ./data/https-portal/ssl_certs:/var/lib/https-portal
 
@@ -29,7 +31,7 @@ services:
       - "ES_HTTP_URL=http://es01:9200"
       - "FESS_DICTIONARY_PATH=/usr/share/elasticsearch/config/dictionary/"
     networks:
-      - esnet
+      - codesearch_net
     volumes:
       - ./data/fess/opt/fess:/opt/fess
       - ./data/fess/var/lib/fess:/var/lib/fess
@@ -58,8 +60,8 @@ services:
     ports:
       - 9200:9200
     networks:
-      - esnet
+      - codesearch_net
 
 networks:
-  esnet:
+  codesearch_net:
     driver: bridge

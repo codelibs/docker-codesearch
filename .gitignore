@@ -1,1 +1,5 @@
-/data/
+/data/elasticsearch/
+/data/fess/var/
+/data/fess/usr/
+/data/https-portal
+
