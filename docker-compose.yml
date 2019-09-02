@@ -1,0 +1,65 @@
+version: '3.1'
+
+services:
+  https-portal:
+    image: steveltn/https-portal:1
+    restart: always
+    ports:
+      - '80:80'
+      - '443:443'
+    depends_on:
+      - fess01
+    environment:
+      DOMAINS: 'codesearch.codelibs.org -> http://fess01:8080'
+      STAGE: local
+      # STAGE: production
+    volumes:
+      - ./data/https-portal/ssl_certs:/var/lib/https-portal
+
+  fess01:
+    image: codelibs/fess:13.3.1
+    container_name: fess01
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - es01
+    environment:
+      - RUN_ELASTICSEARCH=false
+      - "ES_HTTP_URL=http://es01:9200"
+      - "FESS_DICTIONARY_PATH=/usr/share/elasticsearch/config/dictionary/"
+    networks:
+      - esnet
+    volumes:
+      - ./data/fess/opt/fess:/opt/fess
+      - ./data/fess/var/lib/fess:/var/lib/fess
+      - ./data/fess/var/log/fess:/var/log/fess
+      - ./data/fess/usr/share/fess/app/WEB-INF/plugin:/usr/share/fess/app/WEB-INF/plugin
+
+  es01:
+    image: codelibs/fess-elasticsearch:7.3.1
+    container_name: es01
+    restart: always
+    environment:
+      - node.name=es01
+      - discovery.seed_hosts=es01
+      - cluster.initial_master_nodes=es01
+      - cluster.name=fess-es
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+      - "FESS_DICTIONARY_PATH=/usr/share/elasticsearch/config/dictionary"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./data/elasticsearch/usr/share/elasticsearch/data:/usr/share/elasticsearch/data
+      - ./data/elasticsearch/usr/share/elasticsearch/config/dictionary:/usr/share/elasticsearch/config/dictionary
+    ports:
+      - 9200:9200
+    networks:
+      - esnet
+
+networks:
+  esnet:
+    driver: bridge
