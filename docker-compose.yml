@@ -33,6 +33,7 @@ services:
     networks:
       - codesearch_net
     volumes:
+      - ./data/fess/home/fess:/home/fess
       - ./data/fess/opt/fess:/opt/fess
       - ./data/fess/var/lib/fess:/var/lib/fess
       - ./data/fess/var/log/fess:/var/log/fess
