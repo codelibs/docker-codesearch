@@ -19,7 +19,7 @@ services:
       - ./data/https-portal/ssl_certs:/var/lib/https-portal
 
   fess01:
-    image: codelibs/fess:snapshot
+    image: codelibs/fess:latest
     container_name: fess01
     restart: always
     ports:
@@ -40,7 +40,7 @@ services:
       - ./data/fess/usr/share/fess/app/WEB-INF/plugin:/usr/share/fess/app/WEB-INF/plugin
 
   es01:
-    image: codelibs/fess-elasticsearch:7.3.1
+    image: codelibs/fess-elasticsearch:latest
     container_name: es01
     restart: always
     environment:
