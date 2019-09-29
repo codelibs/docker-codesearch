@@ -38,6 +38,8 @@ services:
       - ./data/fess/var/lib/fess:/var/lib/fess
       - ./data/fess/var/log/fess:/var/log/fess
       - ./data/fess/usr/share/fess/app/WEB-INF/plugin:/usr/share/fess/app/WEB-INF/plugin
+      - ./data/fess/usr/share/fess/app/WEB-INF/view/codesearch:/usr/share/fess/app/WEB-INF/view/codesearch
+      - ./data/fess/usr/share/fess/app/css/codesearch:/usr/share/fess/app/css/codesearch
 
   es01:
     image: codelibs/fess-elasticsearch:latest
