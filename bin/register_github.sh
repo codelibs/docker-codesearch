@@ -6,6 +6,8 @@ REPO_DOMAIN=$3
 REPO_ORG=$4
 REPO_NAME=$5
 
+TMP_FILE=/tmp/register_github.$$
+
 curl -sk -H "Authorization:$ACCESS_TOKEN" -XPUT "$FESS_URL/api/admin/dataconfig/setting" -d '
 {
   "version_no": -1,
@@ -23,4 +25,25 @@ curl -sk -H "Authorization:$ACCESS_TOKEN" -XPUT "$FESS_URL/api/admin/dataconfig/
   "created_by": "admin",
   "created_time": 0
 }
-'
+' > $TMP_FILE
+CONFIG_ID=`cat $TMP_FILE | jq -r '.response.id'`
+
+curl -sk -H "Authorization:$ACCESS_TOKEN" -XPUT "$FESS_URL/api/admin/scheduler/setting" -d '
+{
+  "version_no": -1,
+  "name": "Data Crawler - '$REPO_DOMAIN'/'$REPO_ORG'/'$REPO_NAME'",
+  "target": "all",
+  "cron_expression": "'$(($RANDOM % 60))' '$(($RANDOM % 24))' * * '$(($RANDOM % 6))'",
+  "script_type": "groovy",
+  "script_data": "return container.getComponent(\"crawlJob\").logLevel(\"info\").sessionId(\"'$CONFIG_ID'\").webConfigIds([] as String[]).fileConfigIds([] as String[]).dataConfigIds([\"'$CONFIG_ID'\"] as String[]).jobExecutor(executor).execute();",
+  "crawler": "true",
+  "job_logging": "true",
+  "available": "true",
+  "sort_order": 0
+}
+' > $TMP_FILE
+JOB_ID=`cat $TMP_FILE | jq -r '.response.id'`
+
+rm $TMP_FILE
+
+echo "$CONFIG_ID $JOB_ID"
