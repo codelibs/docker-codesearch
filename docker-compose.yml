@@ -55,6 +55,9 @@ services:
       - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
       - "FESS_DICTIONARY_PATH=/usr/share/elasticsearch/config/dictionary"
     ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
       memlock:
         soft: -1
         hard: -1
