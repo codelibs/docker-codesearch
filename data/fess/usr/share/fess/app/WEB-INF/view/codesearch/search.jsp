@@ -7,6 +7,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title>${f:h(displayQuery)}-<la:message
 		key="labels.search_title" /></title>
+<%@ include file="gtmHead.jsp" %>
 <c:if test="${osddLink}">
 	<link rel="search" type="application/opensearchdescription+xml"
 		href="${fe:url('/osdd')}"
@@ -19,6 +20,7 @@
 	type="text/css" />
 </head>
 <body class="search">
+<%@ include file="gtmBody.jsp" %>
 	<jsp:include page="header.jsp" />
 	<main id="content" class="container">
 		<ul class="list-inline">

@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title><la:message key="labels.search_title" /></title>
+<%@ include file="gtmHead.jsp" %>
 <c:if test="${osddLink}">
 	<link rel="search" type="application/opensearchdescription+xml"
 		href="${fe:url('/osdd')}"
@@ -18,6 +19,7 @@
 	type="text/css" />
 </head>
 <body>
+<%@ include file="gtmBody.jsp" %>
 	<la:form action="search" method="get" styleId="searchForm">
 		${fe:facetForm()}${fe:geoForm()}
 		<header>

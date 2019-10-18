@@ -19,7 +19,7 @@ services:
       - ./data/https-portal/ssl_certs:/var/lib/https-portal
 
   fess01:
-    image: codelibs/fess:latest
+    image: codelibs/fess:snapshot
     container_name: fess01
     restart: always
     ports:
