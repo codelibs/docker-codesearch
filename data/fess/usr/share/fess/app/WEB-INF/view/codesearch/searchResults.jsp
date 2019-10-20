@@ -61,10 +61,11 @@
 							key="${facetQueryView.title}" /></li>
 					<c:set var="facetFound" value="F"/>
 					<c:forEach var="queryEntry" items="${facetQueryView.queryMap}">
-						<c:if test="${facetResponse.queryCountMap[queryEntry.value] != 0}">
+						<c:if test="${facetResponse.queryCountMap[queryEntry.value] > 0}">
 							<li class="list-group-item"><la:link
 									href="/search?q=${f:u(q)}&ex_q=${f:u(queryEntry.value)}&sdh=${f:u(fe:sdh(sdh))}${fe:pagingQuery(queryEntry.value)}${fe:facetQuery()}${fe:geoQuery()}">
-									<la:message key="${queryEntry.key}" />
+									<c:if test="${fn:startsWith(queryEntry.key, 'labels.')}"><la:message key="${queryEntry.key}" /></c:if>
+									<c:if test="${not fn:startsWith(queryEntry.key, 'labels.')}">${f:h(queryEntry.key)}</c:if>
 									<span class="badge badge-secondary badge-pill float-right">${f:h(facetResponse.queryCountMap[queryEntry.value])}</span>
 								</la:link></li>
 							<c:set var="facetFound" value="T"/>
@@ -88,6 +89,7 @@
 	<input type="hidden" id="queryId" value="${f:u(queryId)}" /> <input
 		type="hidden" id="rt" value="${f:u(requestedTime)}" />
 	<ol class="list-unstyled col-md-9">
+<%@ include file="adsenseResultTop.jsp" %>
 		<c:forEach var="doc" varStatus="s" items="${documentItems}">
 			<li id="result${s.index}">
 				<div class="repository text-truncate">

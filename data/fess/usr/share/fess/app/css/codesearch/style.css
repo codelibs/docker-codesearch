@@ -180,6 +180,10 @@ legend{
 	background-repeat: no-repeat;
 }
 
+.ad_result_top {
+	height: 100px;
+}
+
 /* Extra small devices (less than 576px) */
 
 @media (max-width: 575.98px) {

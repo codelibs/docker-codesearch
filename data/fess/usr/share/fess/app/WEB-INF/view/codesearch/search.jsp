@@ -18,7 +18,7 @@
 <link href="${fe:url('/css/codesearch/style.css')}" rel="stylesheet" type="text/css" />
 <link href="${fe:url('/css/font-awesome.min.css')}" rel="stylesheet"
 	type="text/css" />
-<%@ include file="adsense.jsp" %>
+<%@ include file="adsenseHead.jsp" %>
 </head>
 <body class="search">
 <%@ include file="gtmBody.jsp" %>

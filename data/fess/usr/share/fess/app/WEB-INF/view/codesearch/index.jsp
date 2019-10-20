@@ -17,10 +17,11 @@
 <link href="${fe:url('/css/codesearch/style.css')}" rel="stylesheet" type="text/css" />
 <link href="${fe:url('/css/font-awesome.min.css')}" rel="stylesheet"
 	type="text/css" />
+<%@ include file="adsenseHead.jsp" %>
 </head>
 <body>
 <%@ include file="gtmBody.jsp" %>
-	<la:form action="search" method="get" styleId="searchForm">
+	<la:form action="/search" method="get" styleId="searchForm">
 		${fe:facetForm()}${fe:geoForm()}
 		<header>
 			<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
