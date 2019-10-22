@@ -79,7 +79,7 @@ legend{
 }
 
 .searchFormBox {
-	margin-top: 8em;
+	margin-top: 1em;
 	margin-bottom: 4em;
 }
 
@@ -191,7 +191,7 @@ legend{
 		width: 200px;
 	}
 	.searchFormBox {
-		margin-top: 4em;
+		margin-top: 1em;
 	}
 	#result .info {
 		display: none;

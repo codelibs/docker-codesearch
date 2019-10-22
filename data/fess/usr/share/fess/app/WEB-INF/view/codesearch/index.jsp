@@ -1,18 +1,6 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
 <%@ page import="org.codelibs.fess.util.ComponentUtil" %>
-<%@ page import="org.codelibs.fess.app.service.SearchService" %>
-<%@ page import="org.codelibs.fess.app.web.base.SearchForm" %>
-<%@ page import="org.codelibs.fess.entity.SearchRenderData" %>
-<%@ page import="org.codelibs.fess.app.web.base.login.FessLoginAssist" %>
-<%
-SearchService searchService = ComponentUtil.getComponent(SearchService.class);
-SearchForm params = new SearchForm();
-params.q = "*:*";
-params.start = 0;
-params.num = 0;
-SearchRenderData data = new SearchRenderData();
-searchService.search(params, data, ComponentUtil.getComponent(FessLoginAssist.class).getSavedUserBean());
-request.setAttribute("facetResponse", data.getFacetResponse());
+<% request.setAttribute("facetResponse", ComponentUtil.getViewHelper().getCachedFacetResponse("*:*"));
 %><!DOCTYPE html>
 <html>
 <head profile="http://a9.com/-/spec/opensearch/1.1/">
