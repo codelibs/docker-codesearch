@@ -1,4 +1,4 @@
-# Code Search for Fess
+# Code Search on Fess
 
 ## Public Site
 
@@ -12,4 +12,18 @@
 bash ./bin/setup.sh
 ```
 
-TODO...
+### Start Server
+
+```
+docker-compose up -d
+```
+
+### Stop Server
+
+```
+docker-compose down
+```
+
+## Configuration
+
+TODO
