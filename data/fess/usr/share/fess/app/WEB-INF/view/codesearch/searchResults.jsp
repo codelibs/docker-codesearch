@@ -85,6 +85,10 @@
 				</div>
 			</c:if>
 		</c:if>
+		<div>
+			<a href="https://github.com/codelibs/docker-codesearch/issues"
+				class="badge badge-light" target="_blank">Report a Problem</a>
+		</div>
 	</aside>
 	<input type="hidden" id="queryId" value="${f:u(queryId)}" /> <input
 		type="hidden" id="rt" value="${f:u(requestedTime)}" />

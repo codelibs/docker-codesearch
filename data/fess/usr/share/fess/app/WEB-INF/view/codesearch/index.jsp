@@ -1,5 +1,19 @@
 <%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
-<!DOCTYPE html>
+<%@ page import="org.codelibs.fess.util.ComponentUtil" %>
+<%@ page import="org.codelibs.fess.app.service.SearchService" %>
+<%@ page import="org.codelibs.fess.app.web.base.SearchForm" %>
+<%@ page import="org.codelibs.fess.entity.SearchRenderData" %>
+<%@ page import="org.codelibs.fess.app.web.base.login.FessLoginAssist" %>
+<%
+SearchService searchService = ComponentUtil.getComponent(SearchService.class);
+SearchForm params = new SearchForm();
+params.q = "*:*";
+params.start = 0;
+params.num = 0;
+SearchRenderData data = new SearchRenderData();
+searchService.search(params, data, ComponentUtil.getComponent(FessLoginAssist.class).getSavedUserBean());
+request.setAttribute("facetResponse", data.getFacetResponse());
+%><!DOCTYPE html>
 <html>
 <head profile="http://a9.com/-/spec/opensearch/1.1/">
 <meta charset="utf-8">
@@ -155,6 +169,41 @@
 					</fieldset>
 				</div>
 			</div>
+			<c:if test="${facetResponse != null}">
+				<div class="row">
+				<c:forEach var="facetQueryView" items="${fe:facetQueryViewList()}">
+					<div class="col-md-4">
+					<ul class="list-group mb-2">
+						<li class="list-group-item text-uppercase"><la:message
+								key="${facetQueryView.title}" /></li>
+						<c:set var="facetFound" value="F"/>
+						<c:forEach var="queryEntry" items="${facetQueryView.queryMap}">
+							<c:if test="${facetResponse.queryCountMap[queryEntry.value] > 0}">
+								<li class="list-group-item"><la:link
+										href="/search?q=${f:u(queryEntry.value)}&sdh=${f:u(fe:sdh(sdh))}${fe:pagingQuery(queryEntry.value)}${fe:facetQuery()}${fe:geoQuery()}">
+										<c:if test="${fn:startsWith(queryEntry.key, 'labels.')}"><la:message key="${queryEntry.key}" /></c:if>
+										<c:if test="${not fn:startsWith(queryEntry.key, 'labels.')}">${f:h(queryEntry.key)}</c:if>
+										<span class="badge badge-secondary badge-pill float-right">${f:h(facetResponse.queryCountMap[queryEntry.value])}</span>
+									</la:link></li>
+								<c:set var="facetFound" value="T"/>
+							</c:if>
+						</c:forEach>
+						<c:if test="${facetFound == 'F'}">
+							<li class="list-group-item"><la:message key="labels.facet_is_not_found" /></li>
+						</c:if>
+					</ul>
+					</div>
+				</c:forEach>
+				<c:if test="${!empty ex_q}">
+					<div class="float-right">
+						<la:link href="/search?q=${f:u(q)}"
+							styleClass="btn btn-link btn-sm">
+							<la:message key="labels.facet_label_reset" />
+						</la:link>
+					</div>
+				</c:if>
+				</div>
+			</c:if>
 		</main>
 		<jsp:include page="footer.jsp" />
 	</la:form>
