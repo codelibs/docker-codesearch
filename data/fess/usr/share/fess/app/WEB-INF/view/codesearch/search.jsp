@@ -5,8 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>${f:h(displayQuery)}-<la:message
-		key="labels.search_title" /></title>
+<title>${f:h(displayQuery)} - Code Search</title>
 <%@ include file="gtmHead.jsp" %>
 <c:if test="${osddLink}">
 	<link rel="search" type="application/opensearchdescription+xml"

@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title><la:message key="labels.search_title" /></title>
+<title>Code Search | Help</title>
 <%@ include file="gtmHead.jsp" %>
 <link href="${fe:url('/css/bootstrap.min.css')}" rel="stylesheet"
 	type="text/css" />
