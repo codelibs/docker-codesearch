@@ -26,7 +26,7 @@
 	<la:form action="/search" method="get" styleId="searchForm">
 		${fe:facetForm()}${fe:geoForm()}
 		<header>
-			<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+			<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-navy">
 				<div id="content" class="container">
 					<div class="navbar-brand"></div>
 					<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar"

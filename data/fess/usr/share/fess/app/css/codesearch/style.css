@@ -184,6 +184,10 @@ legend{
 	height: 100px;
 }
 
+.bg-navy {
+	background-color: #091E43;
+}
+
 /* Extra small devices (less than 576px) */
 
 @media (max-width: 575.98px) {
