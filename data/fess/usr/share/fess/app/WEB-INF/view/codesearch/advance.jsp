@@ -70,6 +70,9 @@
 										</la:link></li>
 								</c:when>
 							</c:choose>
+							<li class="nav-item"><a href="https://github.com/codelibs/docker-codesearch" class="nav-link help-link" target="_blank">
+									<em class="fab fa-github"></em>
+								</a></li>
 							<li class="nav-item"><la:link href="/help" styleClass="nav-link help-link">
 									<em class="fa fa-fw fa-question-circle"></em>
 									<la:message key="labels.index_help" />
