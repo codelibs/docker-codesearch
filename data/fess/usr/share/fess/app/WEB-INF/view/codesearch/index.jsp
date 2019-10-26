@@ -163,6 +163,26 @@
 			</div>
 			<c:if test="${facetResponse != null}">
 				<div class="row">
+				<c:forEach var="fieldData" items="${facetResponse.fieldList}">
+					<c:if test="${fieldData.valueCountMap.size() > 0}">
+					<div class="col-md-4">
+					<ul class="list-group mb-2">
+						<li class="list-group-item text-uppercase">
+${f:h(fieldData.name)}
+						</li>
+						<c:forEach var="countEntry" items="${fieldData.valueCountMap}">
+							<c:if test="${countEntry.value != 0 && fe:labelexists(countEntry.key)}">
+							<li class="list-group-item">
+								<la:link href="/search?q=${f:u(q)}&ex_q=label%3a${f:u(countEntry.key)}&sdh=${f:u(fe:sdh(sh))}${fe:pagingQuery(null)}${fe:facetQuery()}${fe:geoQuery()}">
+								${f:h(countEntry.key)}
+								<span class="badge badge-secondary badge-pill float-right">${f:h(countEntry.value)}</span>
+								</la:link></li>
+							</c:if>
+						</c:forEach>
+					</ul>
+					</div>
+					</c:if>
+				</c:forEach>
 				<c:forEach var="facetQueryView" items="${fe:facetQueryViewList()}">
 					<div class="col-md-4">
 					<ul class="list-group mb-2">
