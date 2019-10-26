@@ -41,6 +41,16 @@
         }
       },
       "filter": {
+        "dotnum_filter": {
+          "type": "pattern_concat",
+          "pattern1": "[0-9\\.]+",
+          "pattern2": "[0-9\\.]+"
+        },
+        "operator_filter": {
+          "type": "pattern_concat",
+          "pattern1": "[!%&=~|\\-\\^+*]+",
+          "pattern2": "[!%&=~|\\-\\^+*]+"
+        },
         "stemmer_en_filter": {
           "type": "stemmer",
           "name": "english"
@@ -1139,6 +1149,8 @@
           "filter": [
             "disable_graph",
             "alphanum_word_filter",
+            "dotnum_filter",
+            "operator_filter",
             "cjk_bigram",
             "lowercase"
           ]
