@@ -1,0 +1,28 @@
+{
+    "properties": {
+      "suggestWord": {
+        "type": "keyword"
+      },
+      "reading": {
+        "type": "keyword"
+      },
+      "permissions": {
+        "type": "keyword"
+      },
+      "boost": {
+        "type": "float"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "createdTime": {
+        "type": "long"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      },
+      "updatedTime": {
+        "type": "long"
+      }
+    }
+}
