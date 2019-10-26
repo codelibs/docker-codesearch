@@ -9,6 +9,11 @@
     },
     "analysis": {
       "char_filter": {
+        "line_number_filter": {
+          "type": "pattern_replace",
+          "pattern": "L\\d+:",
+          "replacement": ""
+        },
         "mapping_fa_filter": {
           "type": "mapping",
           "mappings_path": "${fess.dictionary.path}fa/mapping.txt"
@@ -642,7 +647,7 @@
         },
         "alphanum_word_filter" : {
           "type" : "alphanum_word",
-          "max_token_length" : 20
+          "max_token_length" : 40
         },
         "minhash_filter" : {
           "type" : "minhash",
@@ -1127,7 +1132,8 @@
         "standard_analyzer": {
           "type": "custom",
           "char_filter": [
-            "mapping_filter"
+            "mapping_filter",
+            "line_number_filter"
           ],
           "tokenizer": "unigram_tokenizer",
           "filter": [
