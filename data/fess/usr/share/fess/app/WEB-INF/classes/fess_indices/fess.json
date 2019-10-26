@@ -1140,11 +1140,7 @@
             "disable_graph",
             "alphanum_word_filter",
             "cjk_bigram",
-            "lowercase",
-            "stopword_en_filter",
-            "english_keywords",
-            "english_override",
-            "stemmer_en_filter"
+            "lowercase"
           ]
         },
         "empty_analyzer": {
