@@ -167,13 +167,11 @@
 					<c:if test="${fieldData.valueCountMap.size() > 0}">
 					<div class="col-md-4">
 					<ul class="list-group mb-2">
-						<li class="list-group-item text-uppercase">
-${f:h(fieldData.name)}
-						</li>
+						<li class="list-group-item text-uppercase">${f:h(fieldData.name)}</li>
 						<c:forEach var="countEntry" items="${fieldData.valueCountMap}">
-							<c:if test="${countEntry.value != 0 && fe:labelexists(countEntry.key)}">
+							<c:if test="${countEntry.value != 0}">
 							<li class="list-group-item">
-								<la:link href="/search?q=${f:u(q)}&ex_q=label%3a${f:u(countEntry.key)}&sdh=${f:u(fe:sdh(sh))}${fe:pagingQuery(null)}${fe:facetQuery()}${fe:geoQuery()}">
+								<la:link href="/search?q=${f:u(fieldData.name)}%3a${f:u(countEntry.key)}${fe:pagingQuery(null)}${fe:facetQuery()}${fe:geoQuery()}">
 								${f:h(countEntry.key)}
 								<span class="badge badge-secondary badge-pill float-right">${f:h(countEntry.value)}</span>
 								</la:link></li>
@@ -192,7 +190,7 @@ ${f:h(fieldData.name)}
 						<c:forEach var="queryEntry" items="${facetQueryView.queryMap}">
 							<c:if test="${facetResponse.queryCountMap[queryEntry.value] > 0}">
 								<li class="list-group-item"><la:link
-										href="/search?q=${f:u(queryEntry.value)}&sdh=${f:u(fe:sdh(sdh))}${fe:pagingQuery(queryEntry.value)}${fe:facetQuery()}${fe:geoQuery()}">
+										href="/search?q=${f:u(queryEntry.value)}${fe:pagingQuery(queryEntry.value)}${fe:facetQuery()}${fe:geoQuery()}">
 										<c:if test="${fn:startsWith(queryEntry.key, 'labels.')}"><la:message key="${queryEntry.key}" /></c:if>
 										<c:if test="${not fn:startsWith(queryEntry.key, 'labels.')}">${f:h(queryEntry.key)}</c:if>
 										<span class="badge badge-secondary badge-pill float-right">${f:h(facetResponse.queryCountMap[queryEntry.value])}</span>

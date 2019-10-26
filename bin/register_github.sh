@@ -15,7 +15,7 @@ curl -sk -H "Authorization:$ACCESS_TOKEN" -XPUT "$FESS_URL/api/admin/dataconfig/
   "updated_time": 0,
   "name": "'$REPO_DOMAIN'/'$REPO_ORG'/'$REPO_NAME'",
   "handler_name": "GitDataStore",
-  "handler_parameter": "uri=https://'$REPO_DOMAIN'/'$REPO_ORG'/'$REPO_NAME'.git\nbase_url=https://'$REPO_DOMAIN'/'$REPO_ORG'/'$REPO_NAME'/blob/master/\nextractors=text/.*:textExtractor,application/xml:textExtractor,application/javascript:textExtractor,\ndelete_old_docs=false\nrepository_path=/home/fess/workspace/'$REPO_NAME'",
+  "handler_parameter": "uri=https://'$REPO_DOMAIN'/'$REPO_ORG'/'$REPO_NAME'.git\nbase_url=https://'$REPO_DOMAIN'/'$REPO_ORG'/'$REPO_NAME'/blob/master/\nextractors=text/.*:textExtractor,application/xml:textExtractor,application/javascript:textExtractor,application/json:textExtractor,application/x-sh:textExtractor,application/x-bat:textExtractor,audio/.*:filenameExtractor,chemical/.*:filenameExtractor,image/.*:filenameExtractor,model/.*:filenameExtractor,video/.*:filenameExtractor,\ndelete_old_docs=false\nrepository_path=/home/fess/workspace/'$REPO_NAME'",
   "handler_script": "url=url\nhost=\"'$REPO_DOMAIN'\"\nsite=\"'$REPO_DOMAIN'/'$REPO_ORG'/'$REPO_NAME'/\" + path\ntitle=name\ncontent=container.getComponent(\"documentHelper\").appendLineNumber(\"L\", content)\ncache=\"\"\ndigest=author.toExternalString()\nanchor=\ncontent_length=contentLength\nlast_modified=timestamp\ntimestamp=timestamp\nfilename=name\nmimetype=mimetype\ndomain=\"'$REPO_DOMAIN'\"\norganization=\"'$REPO_ORG'\"\nrepository=\"'$REPO_NAME'\"\npath=path\nrepository_url=\"https://'$REPO_DOMAIN'/'$REPO_ORG'/'$REPO_NAME'\"\nfiletype=container.getComponent(\"fileTypeHelper\").get(mimetype)",
   "boost": 1,
   "available": "true",
