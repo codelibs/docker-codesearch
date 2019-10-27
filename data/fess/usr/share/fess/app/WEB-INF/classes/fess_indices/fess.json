@@ -48,8 +48,12 @@
         },
         "operator_filter": {
           "type": "pattern_concat",
-          "pattern1": "[!%&=~|\\-\\^+*]+",
-          "pattern2": "[!%&=~|\\-\\^+*]+"
+          "pattern1": "[!%&=~|\\-\\^+*<>]+",
+          "pattern2": "[!%&=~|\\-\\^+*<>]+"
+        },
+        "code_stop_filter": {
+          "type": "stop",
+          "stopwords": ["(", ")", "{", "}", "[", "]", ",", ".", ":", ";"]
         },
         "stemmer_en_filter": {
           "type": "stemmer",
@@ -1151,6 +1155,7 @@
             "alphanum_word_filter",
             "dotnum_filter",
             "operator_filter",
+            "code_stop_filter",
             "cjk_bigram",
             "lowercase"
           ]
