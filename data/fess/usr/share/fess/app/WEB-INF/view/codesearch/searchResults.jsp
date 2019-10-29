@@ -123,7 +123,8 @@
 				</div>
 				<div class="body">
 					<div class="description col-md-12">
-						${fe:formatCode("L", "prettyprint", doc.mimetype, doc.content_description)}
+						${fe:formatCode("L", "prettyprint", doc.mimetype,
+						  doc.content_description.replaceAll("([\\s\\.;])(\\w[\\w$]+)(\\s*[\\(\\[&])", '$1<a href="/search/?q=$2">$2</a>$3'))}
 					</div>
 				</div>
 				<div class="info">
