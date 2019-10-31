@@ -1,5 +1,8 @@
 # Code Search on Fess
 
+Fess is Enterprise Search Server.
+This docker environment provides Source Code Search Server on Fess.
+
 ## Public Site
 
 * [codesearch.codelibs.org](https://codesearch.codelibs.org/)
