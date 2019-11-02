@@ -97,7 +97,7 @@
 		<c:forEach var="doc" varStatus="s" items="${documentItems}">
 			<li id="result${s.index}">
 				<div class="repository text-truncate">
-					<a href="${f:u(doc.repository_url)}"><cite>${f:h(doc.domain)}/${f:h(doc.organization)}/${f:h(doc.repository)}</cite></a>
+					<a href="${doc.repository_url}"><cite>${f:h(doc.domain)}/${f:h(doc.organization)}/${f:h(doc.repository)}</cite></a>
 				</div>
 				<h3 class="title text-truncate">
 					<a class="link" href="${doc.url_link}" data-uri="${doc.url_link}"

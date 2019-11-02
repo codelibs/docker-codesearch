@@ -103,7 +103,9 @@ legend{
 }
 
 #result ol li {
-	margin: 1em 0;
+	margin: 0;
+	padding: 10px 0;
+	border-bottom: solid 1px #ccc;
 }
 
 #result ol li:first-child {
