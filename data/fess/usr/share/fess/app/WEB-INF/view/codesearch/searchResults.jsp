@@ -95,7 +95,7 @@
 	<ol class="list-unstyled col-md-9">
 <%@ include file="adsenseResultTop.jsp" %>
 		<c:forEach var="doc" varStatus="s" items="${documentItems}">
-			<li id="result${s.index}">
+			<li id="result${s.index}" class="result-box">
 				<div class="repository text-truncate">
 					<a href="${doc.repository_url}"><cite>${f:h(doc.domain)}/${f:h(doc.organization)}/${f:h(doc.repository)}</cite></a>
 				</div>
