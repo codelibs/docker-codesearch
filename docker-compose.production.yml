@@ -1,0 +1,11 @@
+version: '3.1'
+
+services:
+  https-portal:
+    environment:
+      STAGE: production
+
+  es01:
+    environment:
+      ES_JAVA_OPTS: -Xms3g -Xmx3g
+
