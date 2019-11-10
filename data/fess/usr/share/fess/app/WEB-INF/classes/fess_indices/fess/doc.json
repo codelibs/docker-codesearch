@@ -598,6 +598,12 @@
       },
       "repository_url": {
         "type": "keyword"
+      },
+      "owner": {
+        "type": "keyword"
+      },
+      "homepage": {
+        "type": "keyword"
       }
     }
 }
