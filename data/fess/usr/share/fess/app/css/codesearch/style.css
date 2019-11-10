@@ -182,6 +182,10 @@ legend{
 	background-repeat: no-repeat;
 }
 
+#result .homepage {
+	color: #666;
+}
+
 .ad_result_top {
 	height: 100px;
 }

@@ -37,8 +37,8 @@
 		<%-- Side Content --%>
 		<c:if test="${facetResponse != null}">
 			<c:forEach var="fieldData" items="${facetResponse.fieldList}">
-				<c:if
-					test="${fieldData.name == 'label' && fieldData.valueCountMap.size() > 0}">
+				<c:if test="${fieldData.valueCountMap.size() > 0}">
+					<c:if test="${fieldData.name == 'label'}">
 					<ul class="list-group mb-2">
 						<li class="list-group-item text-uppercase"><la:message
 								key="labels.facet_label_title" /></li>
@@ -53,6 +53,22 @@
 							</c:if>
 						</c:forEach>
 					</ul>
+					</c:if>
+					<c:if test="${fieldData.name != 'label'}">
+					<ul class="list-group mb-2">
+						<li class="list-group-item text-uppercase">${f:h(fieldData.name)}</li>
+						<c:forEach var="countEntry" items="${fieldData.valueCountMap}">
+							<c:if test="${countEntry.value != 0}">
+							<li class="list-group-item">
+								<la:link href="/search?q=${f:u(fieldData.name)}%3a${f:u(countEntry.key)}${fe:pagingQuery(null)}${fe:facetQuery()}${fe:geoQuery()}">
+								<c:if test="${fieldData.name=='filetype'}">${fe:message('labels.facet_'.concat(fieldData.name).concat('_').concat(countEntry.key),countEntry.key.toUpperCase())}</c:if>
+								<c:if test="${fieldData.name!='filetype'}">${f:h(countEntry.key)}</c:if>
+								<span class="badge badge-secondary badge-pill float-right">${f:h(countEntry.value)}</span>
+								</la:link></li>
+							</c:if>
+						</c:forEach>
+					</ul>
+					</c:if>
 				</c:if>
 			</c:forEach>
 			<c:forEach var="facetQueryView" items="${fe:facetQueryViewList()}">
@@ -97,7 +113,10 @@
 		<c:forEach var="doc" varStatus="s" items="${documentItems}">
 			<li id="result${s.index}" class="result-box">
 				<div class="repository text-truncate">
-					<a href="${doc.repository_url}"><cite>${f:h(doc.domain)}/${f:h(doc.organization)}/${f:h(doc.repository)}</cite></a>
+					<a href="${doc.repository_url}">
+					<c:if test="${doc.domain=='github.com' and not empty doc.owner}"><img src="https://avatars2.githubusercontent.com/u/${f:u(doc.owner)}?s=40&v=4" width="20" height="20"></c:if>
+					<cite>${f:h(doc.domain)}/${f:h(doc.organization)}/${f:h(doc.repository)}</cite></a>
+					<c:if test="${not empty doc.homepage}"><a href="${doc.homepage}"><span class="fas fa-home homepage"></span></a></c:if>
 				</div>
 				<h3 class="title text-truncate">
 					<a class="link" href="${doc.url_link}" data-uri="${doc.url_link}"

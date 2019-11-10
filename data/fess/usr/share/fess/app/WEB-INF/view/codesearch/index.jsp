@@ -172,7 +172,8 @@
 							<c:if test="${countEntry.value != 0}">
 							<li class="list-group-item">
 								<la:link href="/search?q=${f:u(fieldData.name)}%3a${f:u(countEntry.key)}${fe:pagingQuery(null)}${fe:facetQuery()}${fe:geoQuery()}">
-								${f:h(countEntry.key)}
+								<c:if test="${fieldData.name=='filetype'}">${fe:message('labels.facet_'.concat(fieldData.name).concat('_').concat(countEntry.key),countEntry.key.toUpperCase())}</c:if>
+								<c:if test="${fieldData.name!='filetype'}">${f:h(countEntry.key)}</c:if>
 								<span class="badge badge-secondary badge-pill float-right">${f:h(countEntry.value)}</span>
 								</la:link></li>
 							</c:if>
