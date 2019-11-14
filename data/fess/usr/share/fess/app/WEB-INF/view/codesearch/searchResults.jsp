@@ -147,8 +147,14 @@
 					</div>
 				</div>
 				<div class="info">
-					<small> <c:if
+					<small>
+						<c:if test="${not empty doc.filetype}">${fe:message('labels.facet_filetype_'.concat(doc.filetype),doc.filetype.toUpperCase())}<c:set var="hasInfo" value="true" /></c:if>
+						<c:if
 							test="${doc.created!=null && doc.created!=''}">
+							<c:if test="${hasInfo}">
+								<div class="d-sm-none"></div>
+								<span class="d-none d-sm-inline">-</span>
+							</c:if>
 							<c:set var="hasInfo" value="true" />
 							<la:message key="labels.search_result_created" />
 							<fmt:formatDate value="${fe:parseDate(doc.created)}"
