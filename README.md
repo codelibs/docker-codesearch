@@ -12,7 +12,7 @@ This docker environment provides Source Code Search Server on Fess.
 ### Setup
 
 ```
-$ git clone -b 13.4.1.0 https://github.com/codelibs/docker-codesearch.git
+$ git clone -b 13.4.3.0 https://github.com/codelibs/docker-codesearch.git
 $ cd docker-codesearch
 $ bash ./bin/setup.sh
 ```
