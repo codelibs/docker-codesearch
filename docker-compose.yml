@@ -17,6 +17,7 @@ services:
       - codesearch_net
     volumes:
       - ./data/https-portal/ssl_certs:/var/lib/https-portal
+      - ./data/https-portal/conf/codesearch.codelibs.org.ssl.conf.erb:/var/lib/nginx-conf/codesearch.codelibs.org.ssl.conf.erb:ro
 
   fess01:
     image: codelibs/fess:13.6.3
