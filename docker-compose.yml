@@ -20,7 +20,7 @@ services:
       - ./data/https-portal/conf/codesearch.codelibs.org.ssl.conf.erb:/var/lib/nginx-conf/codesearch.codelibs.org.ssl.conf.erb:ro
 
   fess01:
-    image: codelibs/fess:13.6.3
+    image: codelibs/fess:13.7.1
     container_name: fess01
     restart: always
     ports:
@@ -45,7 +45,7 @@ services:
       - ./data/fess/usr/share/fess/app/images/codesearch:/usr/share/fess/app/images/codesearch
 
   es01:
-    image: codelibs/fess-elasticsearch:7.6.2
+    image: codelibs/fess-elasticsearch-oss:7.7.1
     container_name: es01
     restart: always
     environment:
