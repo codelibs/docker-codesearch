@@ -12,7 +12,7 @@ This docker environment provides Source Code Search Server on Fess.
 ### Setup
 
 ```
-$ git clone -b 13.6.3.0 https://github.com/codelibs/docker-codesearch.git
+$ git clone -b 13.7.1.0 https://github.com/codelibs/docker-codesearch.git
 $ cd docker-codesearch
 $ bash ./bin/setup.sh
 ```
@@ -28,7 +28,7 @@ and then access `http://localhost:8080/`.
 ### Create Access Token
 
 To use Admin API for Fess, you need to create an access token with `{role}admin-api` permission at Admin Access Token page(`http://localhost:8080/admin/accesstoken/`).
-For more details, see [Admin Access Token](https://fess.codelibs.org/13.6/admin/accesstoken-guide.html).
+For more details, see [Admin Access Token](https://fess.codelibs.org/13.7/admin/accesstoken-guide.html).
 
 ### Install DataStore Git Plugin
 
