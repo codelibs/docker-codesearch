@@ -1,6 +1,5 @@
-<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%>
-<%@ page import="org.codelibs.fess.util.ComponentUtil" %>
-<% request.setAttribute("facetResponse", ComponentUtil.getViewHelper().getCachedFacetResponse("*:*"));
+<%@page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8"%><%@ page import="org.codelibs.fess.util.ComponentUtil" %><%
+request.setAttribute("facetResponse", ComponentUtil.getViewHelper().getCachedFacetResponse("*:*"));
 %><!DOCTYPE html>
 <html>
 <head profile="http://a9.com/-/spec/opensearch/1.1/">
