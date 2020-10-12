@@ -38,6 +38,10 @@ server {
         auth_basic_user_file <%= domain.htaccess_path %>;
     <% end %>
 
+    <% if ENV['CUSTOM_NGINX_SERVER_CONFIG_BLOCK'] %>
+        <%= ENV['CUSTOM_NGINX_SERVER_CONFIG_BLOCK'] %>
+    <% end %>
+
     <% if domain.upstream %>
     location / {
         <% if ENV['DYNAMIC_UPSTREAM'] && ENV['DYNAMIC_UPSTREAM'].downcase == 'true' %>
@@ -54,7 +58,7 @@ server {
         <% if ENV['WEBSOCKET'] && ENV['WEBSOCKET'].downcase == 'true' %>
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "Upgrade";
+        proxy_set_header Connection $connection_upgrade;
         proxy_read_timeout 2h;
         <% end %>
         proxy_cookie_path / "/; secure; SameSite=none";
