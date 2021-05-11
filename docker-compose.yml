@@ -21,7 +21,7 @@ services:
       - ./data/https-portal/conf/codesearch.codelibs.org.ssl.conf.erb:/var/lib/nginx-conf/codesearch.codelibs.org.ssl.conf.erb:ro
 
   fess01:
-    image: ghcr.io/codelibs/fess:13.10.1
+    image: ghcr.io/codelibs/fess:13.12.1
     container_name: fess01
     restart: always
     ports:
@@ -39,14 +39,14 @@ services:
       - ./data/fess/opt/fess:/opt/fess
       - ./data/fess/var/lib/fess:/var/lib/fess
       - ./data/fess/var/log/fess:/var/log/fess
-      - ./data/fess/usr/share/fess/app/WEB-INF/plugin:/usr/share/fess/app/WEB-INF/plugin
+#      - ./data/fess/usr/share/fess/app/WEB-INF/plugin:/usr/share/fess/app/WEB-INF/plugin
       - ./data/fess/usr/share/fess/app/WEB-INF/view/codesearch:/usr/share/fess/app/WEB-INF/view/codesearch
       - ./data/fess/usr/share/fess/app/WEB-INF/classes/fess_indices:/usr/share/fess/app/WEB-INF/classes/fess_indices
       - ./data/fess/usr/share/fess/app/css/codesearch:/usr/share/fess/app/css/codesearch
       - ./data/fess/usr/share/fess/app/images/codesearch:/usr/share/fess/app/images/codesearch
 
   es01:
-    image: ghcr.io/codelibs/fess-elasticsearch-oss:7.10.1
+    image: ghcr.io/codelibs/fess-elasticsearch:7.12.1
     container_name: es01
     restart: always
     environment:
