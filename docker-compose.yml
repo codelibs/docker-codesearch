@@ -21,7 +21,7 @@ services:
       - ./data/https-portal/conf/codesearch.codelibs.org.ssl.conf.erb:/var/lib/nginx-conf/codesearch.codelibs.org.ssl.conf.erb:ro
 
   fess01:
-    image: ghcr.io/codelibs/fess:13.12.1
+    image: ghcr.io/codelibs/fess:13.15.3
     container_name: fess01
     restart: always
     ports:
@@ -46,7 +46,7 @@ services:
       - ./data/fess/usr/share/fess/app/images/codesearch:/usr/share/fess/app/images/codesearch
 
   es01:
-    image: ghcr.io/codelibs/fess-elasticsearch:7.12.1
+    image: ghcr.io/codelibs/fess-elasticsearch:7.15.2
     container_name: es01
     restart: always
     environment:
@@ -55,7 +55,7 @@ services:
       - cluster.initial_master_nodes=es01
       - cluster.name=fess-es
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g -Dlog4j2.formatMsgNoLookups=true"
       - "FESS_DICTIONARY_PATH=/usr/share/elasticsearch/config/dictionary"
     ulimits:
       nofile:
