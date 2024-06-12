@@ -1,7 +1,6 @@
 # Code Search on Fess
 
-[Fess](https://fess.codelibs.org/) is Enterprise Search Server.
-This docker environment provides Source Code Search Server on Fess.
+[Fess](https://fess.codelibs.org/) is an Enterprise Search Server. This Docker environment provides a Source Code Search Server using Fess.
 
 ## Public Site
 
@@ -11,57 +10,56 @@ This docker environment provides Source Code Search Server on Fess.
 
 ### Setup
 
-```
-$ git clone -b 13.10.1.0 https://github.com/codelibs/docker-codesearch.git
+First, clone the repository and navigate into the directory:
+
+```bash
+$ git clone https://github.com/codelibs/docker-codesearch.git
 $ cd docker-codesearch
 $ bash ./bin/setup.sh
 ```
 
-### Start Server
+### Start the Server
 
+To start the server, use Docker Compose:
+
+```bash
+docker compose -f compose.yaml up -d
 ```
-docker-compose up -d
-```
 
-and then access `http://localhost:8080/`.
+Once the server is running, access it at [http://localhost:8080/](http://localhost:8080/).
 
-### Create Access Token
+### Create an Access Token
 
-To use Admin API for Fess, you need to create an access token with `{role}admin-api` permission at Admin Access Token page(`http://localhost:8080/admin/accesstoken/`).
-For more details, see [Admin Access Token](https://fess.codelibs.org/13.10/admin/accesstoken-guide.html).
+To use the Admin API for Fess, create an access token with the `{role}admin-api` permission on the Admin Access Token page ([http://localhost:8080/admin/accesstoken/](http://localhost:8080/admin/accesstoken/)).
 
-### Install DataStore Git Plugin
+For more details, see the [Admin Access Token Guide](https://fess.codelibs.org/14.14/admin/accesstoken-guide.html).
 
-To crawl a git repository, you need to install fess-ds-git plugin in Admin Plugin page(`http://localhost:8080/admin/plugin/`).
+### Create DataStore Configuration for GitHub
 
-### Create DataStore coniguration for GitHub
+You can create DataStore and Scheduler settings on Fess using the `bin/register_github.sh` script:
 
-Using `bin/register_github.sh`, you can create DataStore and Scheduler settings on Fess.
-
-```
+```bash
 register_github.sh ACCESS_TOKEN FESS_URL REPO_DOMAIN REPO_ORG REPO_NAME
 
 Example:
 $ bash ./bin/register_github.sh ...token... http://localhost:8080 github.com codelibs fess
 ```
 
-You can check if settings are created in `http://localhost:8080/admin/dataconfig/`.
+Check the created settings on the DataConfig page ([http://localhost:8080/admin/dataconfig/](http://localhost:8080/admin/dataconfig/)).
 
-### Start Crawler
+### Start the Crawler
 
-To start the crawler, run `Default Crawler` or `Data Crawler - ...` in Admin Scheduler page(`http://localhost:8080/admin/scheduler/`).
+To start the crawler, run `Default Crawler` or `Data Crawler - ...` on the Admin Scheduler page ([http://localhost:8080/admin/scheduler/](http://localhost:8080/admin/scheduler/)).
 
 ### Search
 
-You can check search results on `http://localhost:8080/`.
+You can view search results at [http://localhost:8080/](http://localhost:8080/).
 
-### Stop Server
+### Stop the Server
 
+To stop the server, use the following command:
+
+```bash
+docker compose -f compose.yaml down
 ```
-docker-compose down
-```
 
-## For Production
-
-* Replace `codesearch.codelibs.org` with your domain in docker-compose.yml.
-* If you want to use SSL, modify a value of STAGE in docker-compose.yml.

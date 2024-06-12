@@ -1,0 +1,68 @@
+services:
+  fess01:
+    container_name: fess01
+    image: ghcr.io/codelibs/fess:14.14.0
+    ports:
+      - "8080:8080"
+    depends_on:
+      - search01
+    environment:
+      - "SEARCH_ENGINE_HTTP_URL=http://search01:9200"
+      - "FESS_DICTIONARY_PATH=/usr/share/opensearch/config/dictionary/"
+      - "FESS_JAVA_OPTS=-Dfess.config.adaptive.load.control=30 -Dfess.config.index.user.initial_password=admin"
+#      - "FESS_LOG_LEVEL=debug"
+    networks:
+      - codesearch_net
+    volumes:
+      #- ./data/fess/home/fess:/home/fess
+      - ./data/fess/opt/fess:/opt/fess
+      - ./data/fess/var/lib/fess:/var/lib/fess
+      - ./data/fess/var/log/fess:/var/log/fess
+      - ./data/fess/usr/share/fess/app/WEB-INF/plugin:/usr/share/fess/app/WEB-INF/plugin
+      - ./data/fess/usr/share/fess/app/WEB-INF/classes/fess_indices/_codesearch:/usr/share/fess/app/WEB-INF/classes/fess_indices/_codesearch
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+    restart: unless-stopped
+
+  search01:
+    container_name: search01
+    image: ghcr.io/codelibs/fess-opensearch:2.14.0
+    environment:
+      - node.name=search01
+      - discovery.seed_hosts=search01
+      - cluster.initial_cluster_manager_nodes=search01
+      - cluster.name=fess-es
+      - bootstrap.memory_lock=true
+      - node.roles=cluster_manager,data,ingest,ml
+      - "OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "DISABLE_INSTALL_DEMO_CONFIG=true"
+      - "DISABLE_SECURITY_PLUGIN=true"
+      - "FESS_DICTIONARY_PATH=/usr/share/opensearch/config/dictionary"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65535
+        hard: 65535
+    volumes:
+      - ./data/opensearch/usr/share/opensearch/data:/usr/share/opensearch/data
+      - ./data/opensearch/usr/share/opensearch/config/dictionary:/usr/share/opensearch/config/dictionary
+    ports:
+      - 9200:9200
+    networks:
+      - codesearch_net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+    restart: unless-stopped
+
+networks:
+  codesearch_net:
+    driver: bridge
+

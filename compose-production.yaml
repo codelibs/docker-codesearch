@@ -1,0 +1,26 @@
+services:
+  https-portal:
+    container_name: web01
+    image: steveltn/https-portal:1
+    ports:
+      - '80:80'
+      - '443:443'
+    depends_on:
+      - fess01
+    environment:
+      DOMAINS: 'codesearch.codelibs.org -> http://fess01:8080'
+      #STAGE: local
+      STAGE: production
+      CUSTOM_NGINX_SERVER_CONFIG_BLOCK: |
+          add_header X-Frame-Options SAMEORIGIN;
+    networks:
+      - codesearch_net
+    volumes:
+      - ./data/https-portal/ssl_certs:/var/lib/https-portal
+      - ./data/https-portal/conf/codesearch.codelibs.org.ssl.conf.erb:/var/lib/nginx-conf/codesearch.codelibs.org.ssl.conf.erb:ro
+    restart: unless-stopped
+
+  search01:
+    environment:
+      ES_JAVA_OPTS: -Xms3g -Xmx3g
+
