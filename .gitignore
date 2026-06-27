@@ -1,11 +1,10 @@
 /data/https-portal/ssl_certs
 /data/fess/home/fess
-#/data/fess/opt/fess
+/data/fess/opt/fess/*
+!/data/fess/opt/fess/system.properties.template
 /data/fess/var/lib/fess
 /data/fess/var/log/fess
 /data/fess/usr/share/fess/app/WEB-INF/plugin
-/data/fess/usr/share/fess/app/WEB-INF/view/codesearch
-/data/fess/usr/share/fess/app/css/codesearch
-/data/fess/usr/share/fess/app/images/codesearch
+/data/fess/themes
 /data/elasticsearch/usr/share/elasticsearch/data
 /data/elasticsearch/usr/share/elasticsearch/config/dictionary

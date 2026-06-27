@@ -9,10 +9,9 @@ services:
     environment:
       - "SEARCH_ENGINE_HTTP_URL=http://search01:9200"
       - "FESS_DICTIONARY_PATH=/usr/share/opensearch/config/dictionary/"
-      # Codesearch-specific Fess configuration now lives here as -Dfess.config.* opts
-      # (replaces data/fess/opt/fess/fess_config.properties). NOTE: index.filetype
-      # cannot be moved here because Fess splits it on real newlines and the entrypoint
-      # word-splits an unquoted $FESS_JAVA_OPTS; it is handled separately (see Task 9).
+      # Codesearch-specific Fess configuration lives here as -Dfess.config.* opts
+      # (fess_config.properties is eliminated; index.filetype is intentionally dropped —
+      # Fess 15.7 default applies).
       - "FESS_JAVA_OPTS=\
         -Dfess.config.adaptive.load.control=30 \
         -Dfess.config.index.user.initial_password=admin \
@@ -36,9 +35,9 @@ services:
       - ./data/fess/var/log/fess:/var/log/fess
       - ./data/fess/usr/share/fess/app/WEB-INF/plugin:/usr/share/fess/app/WEB-INF/plugin
       - ./data/fess/usr/share/fess/app/WEB-INF/classes/fess_indices/_codesearch:/usr/share/fess/app/WEB-INF/classes/fess_indices/_codesearch
-      - ./data/fess/usr/share/fess/app/WEB-INF/view/codesearch:/usr/share/fess/app/WEB-INF/view/codesearch
-      - ./data/fess/usr/share/fess/app/css/codesearch:/usr/share/fess/app/css/codesearch
-      - ./data/fess/usr/share/fess/app/images/codesearch:/usr/share/fess/app/images/codesearch
+      # Static theme fetched from fess-themes by setup.sh; mounted at Fess app themes dir.
+      # TODO(Task 10): verify /usr/share/fess/app/themes is the correct path in the 15.7 container.
+      - ./data/fess/themes/codesearch:/usr/share/fess/app/themes/codesearch
     logging:
       driver: "json-file"
       options:
