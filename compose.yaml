@@ -1,7 +1,7 @@
 services:
   fess01:
     container_name: fess01
-    image: ghcr.io/codelibs/fess:14.17.0
+    image: ghcr.io/codelibs/fess:15.7.0
     ports:
       - "8080:8080"
     depends_on:
@@ -9,7 +9,23 @@ services:
     environment:
       - "SEARCH_ENGINE_HTTP_URL=http://search01:9200"
       - "FESS_DICTIONARY_PATH=/usr/share/opensearch/config/dictionary/"
-      - "FESS_JAVA_OPTS=-Dfess.config.adaptive.load.control=30 -Dfess.config.index.user.initial_password=admin"
+      # Codesearch-specific Fess configuration now lives here as -Dfess.config.* opts
+      # (replaces data/fess/opt/fess/fess_config.properties). NOTE: index.filetype
+      # cannot be moved here because Fess splits it on real newlines and the entrypoint
+      # word-splits an unquoted $FESS_JAVA_OPTS; it is handled separately (see Task 9).
+      - "FESS_JAVA_OPTS=\
+        -Dfess.config.adaptive.load.control=30 \
+        -Dfess.config.index.user.initial_password=admin \
+        -Dfess.config.search_engine.type=codesearch \
+        -Dfess.config.app.cipher.key=___change__me___ \
+        -Dfess.config.query.additional.response.fields=domain,organization,repository,path,repository_url,owner,homepage \
+        -Dfess.config.query.additional.api.response.fields=domain,organization,repository,path,repository_url,owner,homepage \
+        -Dfess.config.query.additional.search.fields=domain,organization,repository,path \
+        -Dfess.config.query.additional.facet.fields=organization,repository,filename \
+        -Dfess.config.query.additional.not.analyzed.fields=domain,organization,repository,path,owner,homepage \
+        -Dfess.config.query.facet.fields=label,organization,repository,filename,filetype \
+        -Dfess.config.query.facet.fields.size=10 \
+        -Dfess.config.query.highlight.fragment.size=500"
       # - "FESS_LOG_LEVEL=debug"
     networks:
       - codesearch_net
@@ -32,7 +48,7 @@ services:
 
   search01:
     container_name: search01
-    image: ghcr.io/codelibs/fess-opensearch:2.17.1
+    image: ghcr.io/codelibs/fess-opensearch:3.6.0
     environment:
       - node.name=search01
       - discovery.seed_hosts=search01
