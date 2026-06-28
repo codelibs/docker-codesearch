@@ -24,8 +24,8 @@ services:
       - ./data/fess/var/log/fess:/var/log/fess
       - ./data/fess/usr/share/fess/app/WEB-INF/plugin:/usr/share/fess/app/WEB-INF/plugin
       - ./data/fess/usr/share/fess/app/WEB-INF/classes/fess_indices/_codesearch:/usr/share/fess/app/WEB-INF/classes/fess_indices/_codesearch
-      # Static theme fetched from fess-themes by setup.sh; mounted at Fess app themes dir.
-      # TODO(Task 10): verify /usr/share/fess/app/themes is the correct path in the 15.7 container.
+      # Static theme fetched from fess-themes by setup.sh; mounted at the Fess app
+      # themes dir (served at /themes/codesearch by the 15.7 container).
       - ./data/fess/themes/codesearch:/usr/share/fess/app/themes/codesearch
     logging:
       driver: "json-file"

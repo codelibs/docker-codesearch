@@ -34,12 +34,6 @@ $ bash ./bin/setup.sh
 4. Generate `data/fess/opt/fess/system.properties` from the template (if not already present)
 5. Generate `data/fess/opt/fess/fess_config.properties` from the pinned base + codesearch overlay
 
-> **Note**: By default `setup.sh` fetches the theme from the `main` branch of [fess-themes](https://github.com/codelibs/fess-themes). While the codesearch theme is still under review ([PR #23](https://github.com/codelibs/fess-themes/pull/23), branch `feat/codesearch-theme`), fetch it from that branch instead:
->
-> ```bash
-> FESS_THEMES_BRANCH=feat/codesearch-theme bash ./bin/setup.sh
-> ```
-
 ### Start the Server
 
 To start the server, use Docker Compose:
@@ -50,13 +44,13 @@ docker compose -f compose.yaml up -d
 
 Once the server is running, access it at [http://localhost:8080/](http://localhost:8080/).
 
-> **Re-index required**: The Fess 15.7 + OpenSearch 3.6.0 version bump requires a full re-index on first run. Start the `Default Crawler` from the Admin Scheduler page to rebuild the index.
+The first start initializes the search indices in OpenSearch (this can take a minute or two). The site has no documents until you register a repository and run a crawler (see below).
 
 ### Create an Access Token
 
 To use the Admin API for Fess, create an access token with the `{role}admin-api` permission on the Admin Access Token page ([http://localhost:8080/admin/accesstoken/](http://localhost:8080/admin/accesstoken/)).
 
-For more details, see the [Admin Access Token Guide](https://fess.codelibs.org/14.14/admin/accesstoken-guide.html).
+For more details, see the [Admin Access Token Guide](https://fess.codelibs.org/15.7/admin/accesstoken-guide.html).
 
 ### Register GitHub Repositories
 
@@ -69,11 +63,13 @@ Example:
 $ bash ./bin/register_github.sh ...token... http://localhost:8080 github.com codelibs fess
 ```
 
+`ACCESS_TOKEN` is the access token created in the previous step. The script also requires [`jq`](https://jqlang.github.io/jq/).
+
 Check the created settings on the DataConfig page ([http://localhost:8080/admin/dataconfig/](http://localhost:8080/admin/dataconfig/)).
 
 ### Start the Crawler
 
-To start the crawler, run `Default Crawler` or `Data Crawler - ...` on the Admin Scheduler page ([http://localhost:8080/admin/scheduler/](http://localhost:8080/admin/scheduler/)).
+To crawl a registered repository, run its `Data Crawler - ...` job from the Admin Scheduler page ([http://localhost:8080/admin/scheduler/](http://localhost:8080/admin/scheduler/)) (select the job, then **Start Now**).
 
 ### Search
 
@@ -132,3 +128,5 @@ To upgrade the Fess / OpenSearch version, edit the pins in `.env` (`FESS_VERSION
 bash ./bin/setup.sh
 docker compose -f compose.yaml up -d
 ```
+
+> **Re-index after a major version bump**: a Fess or OpenSearch major upgrade can change the index format. If search returns errors or stops returning results after upgrading, re-run your `Data Crawler - …` jobs from the [Admin Scheduler](http://localhost:8080/admin/scheduler/) to rebuild the index.

@@ -7,9 +7,8 @@ fess_plugins="
 fess-ds-git:15.7.0
 "
 
-# fess-themes branch to fetch the codesearch static theme from.
-# Override with FESS_THEMES_BRANCH=... while the theme is unmerged (PR #23,
-# branch feat/codesearch-theme). Defaults to main once it is merged.
+# fess-themes branch to fetch the codesearch static theme from (default: main).
+# Override with FESS_THEMES_BRANCH=<branch> to test theme changes from another branch.
 fess_themes_branch="${FESS_THEMES_BRANCH:-main}"
 
 if [ $(uname -s) = "Linux" ] ; then
@@ -39,9 +38,7 @@ for fess_plugin in ${fess_plugins} ; do
     https://repo1.maven.org/maven2/org/codelibs/fess/${plugin_name}/${plugin_version}/${plugin_name}-${plugin_version}.jar
 done
 
-# Fetch codesearch static theme from fess-themes repo.
-# NOTE: clones the ${fess_themes_branch} branch (default: main). While the theme
-# is still under review, set FESS_THEMES_BRANCH=feat/codesearch-theme (PR #23).
+# Fetch codesearch static theme from fess-themes repo (clones ${fess_themes_branch}).
 if [ ! -d ${base_dir}/data/fess/themes/codesearch ]; then
   echo "Fetching codesearch theme from fess-themes (branch: ${fess_themes_branch})..."
   mkdir -p ${base_dir}/data/fess/themes/codesearch
