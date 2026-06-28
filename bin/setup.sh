@@ -1,9 +1,10 @@
 #!/bin/bash
 
 base_dir=$(cd $(dirname $0);cd ..;pwd)
+# fess-script-groovy is no longer downloaded: the Groovy script engine is
+# bundled in Fess core since 15.0.
 fess_plugins="
-fess-script-groovy:14.17.0
-fess-ds-git:14.17.0
+fess-ds-git:15.7.0
 "
 
 if [ $(uname -s) = "Linux" ] ; then

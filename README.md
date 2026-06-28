@@ -29,7 +29,7 @@ $ bash ./bin/setup.sh
 
 `setup.sh` will:
 1. Create required data directories
-2. Download Fess plugins (fess-script-groovy, fess-ds-git)
+2. Download the Fess data store plugin (fess-ds-git)
 3. Fetch the codesearch static theme from fess-themes (if not already present)
 4. Generate `data/fess/opt/fess/system.properties` from the template (if not already present)
 5. Generate `data/fess/opt/fess/fess_config.properties` from the pinned base + codesearch overlay
