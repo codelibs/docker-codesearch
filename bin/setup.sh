@@ -49,6 +49,9 @@ if [ ! -f ${base_dir}/data/fess/opt/fess/system.properties ]; then
   cp ${base_dir}/data/fess/opt/fess/system.properties.template ${base_dir}/data/fess/opt/fess/system.properties
 fi
 
+echo "Generating fess_config.properties (base + codesearch overlay)..."
+bash ${base_dir}/bin/render-fess-config.sh
+
 if [ $(uname -s) = "Linux" ] ; then
   echo "Changing an owner for directories..."
   sudo chown -R root ${base_dir}/data/https-portal/ssl_certs

@@ -9,10 +9,11 @@
 ## Architecture / Theme Model
 
 - **Theme**: Fess 15.7 static theme system — `theme.default=codesearch` in `system.properties` selects the codesearch theme. No virtual-host routing is needed for theme activation.
-- **Fess config**: Codesearch-specific settings are passed via `-Dfess.config.*` options in `FESS_JAVA_OPTS` (see `compose.yaml`). There is no `fess_config.properties` file.
-- **system.properties**: The live file (`data/fess/opt/fess/system.properties`) is generated from `data/fess/opt/fess/system.properties.template` by `setup.sh` on first run. The live file is git-ignored so local edits (e.g. changing the cipher key) are not accidentally committed.
+- **Fess config (`fess_config.properties`)**: `setup.sh` generates `data/fess/opt/fess/fess_config.properties` from the upstream base for the pinned Fess version plus the codesearch overlay (`conf/fess_config.overlay.properties`) and an optional local override (`conf/fess_config.local.properties`). It is mounted at `/opt/fess`, which the image places ahead of its `/etc/fess` default on the classpath, so the generated file takes effect. Only the delta is tracked in git; the base auto-tracks the pinned version. See [Configuration](#configuration).
+- **Version pins (`.env`)**: `FESS_VERSION` / `OPENSEARCH_VERSION` are the single source of truth for the image tags (`compose.yaml`) and the `fess_config.properties` base.
+- **system.properties**: The live file (`data/fess/opt/fess/system.properties`) is generated from `data/fess/opt/fess/system.properties.template` by `setup.sh` on first run. The live file is git-ignored.
 - **Theme files**: The codesearch static theme is fetched from the [fess-themes](https://github.com/codelibs/fess-themes) repository by `setup.sh` and stored in `data/fess/themes/codesearch/`. This directory is mounted into the container at `/usr/share/fess/app/themes/codesearch`.
-- **index.filetype**: Dropped; Fess 15.7 default applies.
+- **index.filetype**: Source-code aware mimetype→label map, maintained in `conf/fess_config.overlay.properties` (a multi-line value, so it lives in the file rather than a `-D` flag).
 
 ## Getting Started
 
@@ -31,6 +32,7 @@ $ bash ./bin/setup.sh
 2. Download Fess plugins (fess-script-groovy, fess-ds-git)
 3. Fetch the codesearch static theme from fess-themes (if not already present)
 4. Generate `data/fess/opt/fess/system.properties` from the template (if not already present)
+5. Generate `data/fess/opt/fess/fess_config.properties` from the pinned base + codesearch overlay
 
 > **Note**: The codesearch theme must be merged into the `main` branch of [fess-themes](https://github.com/codelibs/fess-themes) before `setup.sh` can fetch it.
 
@@ -83,14 +85,18 @@ docker compose -f compose.yaml down
 
 ## Configuration
 
-### Fess settings (FESS_JAVA_OPTS)
+### Fess settings (fess_config.properties)
 
-Codesearch-specific Fess configuration is passed as `-Dfess.config.*` options in `FESS_JAVA_OPTS` in `compose.yaml`. Edit `compose.yaml` to change these settings.
+Codesearch-specific `fess_config.properties` settings are maintained as a small delta in `conf/fess_config.overlay.properties`. `setup.sh` (via `bin/render-fess-config.sh`) fetches the upstream base for the pinned `FESS_VERSION` and overlays this delta to generate `data/fess/opt/fess/fess_config.properties`. After editing the overlay, re-run `setup.sh` (or `bash ./bin/render-fess-config.sh`).
 
-**Important**: Change the cipher key before deploying to production:
-```yaml
--Dfess.config.app.cipher.key=your-secret-key-here
+**Secrets / per-deployment values** (e.g. the cipher key, the initial admin password) must **not** go in the tracked overlay. Create `conf/fess_config.local.properties` (git-ignored) — its keys are applied last and win:
+
+```properties
+app.cipher.key=your-secret-key-here
+index.user.initial_password=your-admin-password
 ```
+
+> The cipher key encrypts stored credentials; set it **before first boot**, because changing it later invalidates already-encrypted data.
 
 ### system.properties
 
@@ -98,10 +104,10 @@ To modify system-level Fess settings, edit `data/fess/opt/fess/system.properties
 
 ## Optional: AI Chat (RAG)
 
-To enable AI-powered chat on search results, add the following to `FESS_JAVA_OPTS` in `compose.yaml` and install an LLM plugin:
+To enable AI-powered chat on search results, add the following to `conf/fess_config.local.properties` (or the overlay) and install an LLM plugin, then re-run `setup.sh`:
 
-```yaml
--Dfess.config.rag.chat.enabled=true
+```properties
+rag.chat.enabled=true
 ```
 
 AI chat is disabled by default. See [Fess LLM plugins](https://github.com/codelibs?q=fess-llm) for available LLM integrations.
@@ -114,10 +120,11 @@ To update to the latest code, use plain `git pull`:
 git pull
 ```
 
-`bin/git_pull.sh` has been removed. Live data files (`system.properties`, theme assets) are git-ignored and will not be overwritten by `git pull`.
+Live/generated files (`system.properties`, `fess_config.properties`, theme assets) are git-ignored and will not be overwritten by `git pull`.
 
-After updating, re-run `setup.sh` if plugin versions or theme assets have changed:
+To upgrade the Fess / OpenSearch version, edit the pins in `.env` (`FESS_VERSION`, `OPENSEARCH_VERSION`) and re-run `setup.sh`. The `fess_config.properties` base is re-fetched for the new version and the codesearch overlay is re-applied automatically:
 
 ```bash
 bash ./bin/setup.sh
+docker compose -f compose.yaml up -d
 ```

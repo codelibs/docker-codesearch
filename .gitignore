@@ -7,6 +7,9 @@
 /tmp/
 *.bulk
 
+# ===== Local fess_config overrides (secrets: cipher key, password, ...) =====
+/conf/fess_config.local.properties
+
 # ===== Fess: runtime & generated (bind-mounted) =====
 /data/fess/home/fess/
 /data/fess/var/
