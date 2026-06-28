@@ -5,7 +5,6 @@ purge.searchlog.day=-1
 append.query.parameter=false
 web.api.popularword=false
 purge.suggest.searchlog.day=30
-virtual.host.value=Host\:codesearch.codelibs.org\=codesearch\nHost\:localhost\:8080\=codesearch
 login.link.enabled=false
 user.favorite=false
 login.required=false
@@ -24,3 +23,4 @@ ldap.memberof.attribute=memberOf
 web.api.json=true
 day.for.cleanup=90
 suggest.searchlog=true
+theme.default=codesearch

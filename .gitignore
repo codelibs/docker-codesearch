@@ -1,11 +1,33 @@
-/data/https-portal/ssl_certs
-/data/fess/home/fess
-#/data/fess/opt/fess
-/data/fess/var/lib/fess
-/data/fess/var/log/fess
-/data/fess/usr/share/fess/app/WEB-INF/plugin
-/data/fess/usr/share/fess/app/WEB-INF/view/codesearch
-/data/fess/usr/share/fess/app/css/codesearch
-/data/fess/usr/share/fess/app/images/codesearch
-/data/elasticsearch/usr/share/elasticsearch/data
-/data/elasticsearch/usr/share/elasticsearch/config/dictionary
+# ===== OS / editor =====
+.DS_Store
+*.swp
+*~
+
+# ===== Local scratch / backups (may contain credentials) =====
+/tmp/
+*.bulk
+
+# ===== Local fess_config overrides (secrets: cipher key, password, ...) =====
+/conf/fess_config.local.properties
+
+# ===== Fess: runtime & generated (bind-mounted) =====
+/data/fess/home/fess/
+/data/fess/var/
+/data/fess/usr/share/fess/app/WEB-INF/plugin/
+/data/fess/themes/
+
+# /opt/fess: ignore generated/live config, keep the tracked template
+/data/fess/opt/fess/*
+!/data/fess/opt/fess/system.properties.template
+
+# Legacy JSP theme overrides & static assets
+# (not mounted by compose; superseded by the fess-themes static theme)
+/data/fess/usr/share/fess/app/WEB-INF/view/
+/data/fess/usr/share/fess/app/css/
+/data/fess/usr/share/fess/app/images/
+
+# ===== OpenSearch: runtime data & dictionary (bind-mounted) =====
+/data/opensearch/
+
+# ===== https-portal: Let's Encrypt / TLS state (keep conf/*.erb) =====
+/data/https-portal/ssl_certs/
