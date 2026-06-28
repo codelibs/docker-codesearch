@@ -34,7 +34,11 @@ $ bash ./bin/setup.sh
 4. Generate `data/fess/opt/fess/system.properties` from the template (if not already present)
 5. Generate `data/fess/opt/fess/fess_config.properties` from the pinned base + codesearch overlay
 
-> **Note**: The codesearch theme must be merged into the `main` branch of [fess-themes](https://github.com/codelibs/fess-themes) before `setup.sh` can fetch it.
+> **Note**: By default `setup.sh` fetches the theme from the `main` branch of [fess-themes](https://github.com/codelibs/fess-themes). While the codesearch theme is still under review ([PR #23](https://github.com/codelibs/fess-themes/pull/23), branch `feat/codesearch-theme`), fetch it from that branch instead:
+>
+> ```bash
+> FESS_THEMES_BRANCH=feat/codesearch-theme bash ./bin/setup.sh
+> ```
 
 ### Start the Server
 
