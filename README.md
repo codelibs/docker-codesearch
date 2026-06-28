@@ -14,6 +14,7 @@
 - **system.properties**: The live file (`data/fess/opt/fess/system.properties`) is generated from `data/fess/opt/fess/system.properties.template` by `setup.sh` on first run. The live file is git-ignored.
 - **Theme files**: The codesearch static theme is fetched from the [fess-themes](https://github.com/codelibs/fess-themes) repository by `setup.sh` and stored in `data/fess/themes/codesearch/`. This directory is mounted into the container at `/usr/share/fess/app/themes/codesearch`.
 - **index.filetype**: Source-code aware mimetype→label map, maintained in `conf/fess_config.overlay.properties` (a multi-line value, so it lives in the file rather than a `-D` flag).
+- **Management CLI (`fessctl`)**: Repositories are registered and crawls are triggered with [`fessctl`](https://github.com/codelibs/fessctl), the official Fess admin-API CLI (see [Install fessctl](#install-fessctl)).
 
 ## Getting Started
 
@@ -48,28 +49,73 @@ The first start initializes the search indices in OpenSearch (this can take a mi
 
 ### Create an Access Token
 
-To use the Admin API for Fess, create an access token with the `{role}admin-api` permission on the Admin Access Token page ([http://localhost:8080/admin/accesstoken/](http://localhost:8080/admin/accesstoken/)).
+`fessctl` (used in the next steps) authenticates to Fess with an access token. Create one with the `{role}admin-api` permission on the Admin Access Token page ([http://localhost:8080/admin/accesstoken/](http://localhost:8080/admin/accesstoken/)).
 
 For more details, see the [Admin Access Token Guide](https://fess.codelibs.org/15.7/admin/accesstoken-guide.html).
 
-### Register GitHub Repositories
+### Install fessctl
 
-You can create DataStore and Scheduler settings on Fess using the `bin/register_github.sh` script:
+Repositories are registered and crawls are triggered with [`fessctl`](https://github.com/codelibs/fessctl), the official CLI for the Fess Admin API:
 
 ```bash
-register_github.sh ACCESS_TOKEN FESS_URL REPO_DOMAIN REPO_ORG REPO_NAME
-
-Example:
-$ bash ./bin/register_github.sh ...token... http://localhost:8080 github.com codelibs fess
+pipx install fessctl      # or: uv tool install fessctl
 ```
 
-`ACCESS_TOKEN` is the access token created in the previous step. The script also requires [`jq`](https://jqlang.github.io/jq/).
+`fessctl` requires Python 3.13+ (`pipx` / `uv` provide it automatically). Point it at the server and the access token created above:
 
-Check the created settings on the DataConfig page ([http://localhost:8080/admin/dataconfig/](http://localhost:8080/admin/dataconfig/)).
+```bash
+export FESS_ENDPOINT=http://localhost:8080
+export FESS_ACCESS_TOKEN=<your-access-token>
+export FESS_VERSION=15.7.0
+fessctl ping    # reports the search engine status (GREEN when ready)
+```
 
-### Start the Crawler
+> `fessctl` can also be run from its container image (`ghcr.io/codelibs/fessctl`); see the [fessctl README](https://github.com/codelibs/fessctl) for details.
 
-To crawl a registered repository, run its `Data Crawler - ...` job from the Admin Scheduler page ([http://localhost:8080/admin/scheduler/](http://localhost:8080/admin/scheduler/)) (select the job, then **Start Now**).
+### Register a Repository
+
+Create a Git data store config for each repository you want to index. The `handler-script` maps Git metadata to the codesearch fields (`organization`, `repository`, `filetype`, …) that power the search facets. Replace `codelibs` / `fess-suggest` / `master` with your own organization, repository, and default branch:
+
+```bash
+fessctl dataconfig create \
+  --name "github.com/codelibs/fess-suggest" \
+  --handler-name GitDataStore \
+  --handler-parameter 'uri=https://github.com/codelibs/fess-suggest.git
+base_url=https://github.com/codelibs/fess-suggest/blob/master/
+extractors=text/.*:textExtractor,application/xml:textExtractor,application/javascript:textExtractor,application/json:textExtractor,application/x-sh:textExtractor,application/x-bat:textExtractor,audio/.*:filenameExtractor,chemical/.*:filenameExtractor,image/.*:filenameExtractor,model/.*:filenameExtractor,video/.*:filenameExtractor,
+delete_old_docs=false
+repository_path=/home/fess/workspace/fess-suggest' \
+  --handler-script 'url=url
+host="github.com"
+site="github.com/codelibs/fess-suggest/" + path
+title=name
+content=container.getComponent("documentHelper").appendLineNumber("L", content)
+digest=author.toExternalString()
+content_length=contentLength
+last_modified=timestamp
+timestamp=timestamp
+filename=name
+mimetype=mimetype
+domain="github.com"
+organization="codelibs"
+repository="fess-suggest"
+path=path
+repository_url="https://github.com/codelibs/fess-suggest"
+filetype=container.getComponent("fileTypeHelper").get(mimetype)' \
+  --permission "{role}guest"
+```
+
+Review the registered repositories on the [DataConfig page](http://localhost:8080/admin/dataconfig/).
+
+### Run the Crawler
+
+Trigger the built-in **Default Crawler**, which crawls every registered data store config:
+
+```bash
+fessctl scheduler start default_crawler
+```
+
+It also runs daily on its own schedule, so newly registered repositories are picked up automatically. Follow progress on the [Scheduler page](http://localhost:8080/admin/scheduler/) (Job Log), or watch results appear on the search page.
 
 ### Search
 
@@ -129,4 +175,4 @@ bash ./bin/setup.sh
 docker compose -f compose.yaml up -d
 ```
 
-> **Re-index after a major version bump**: a Fess or OpenSearch major upgrade can change the index format. If search returns errors or stops returning results after upgrading, re-run your `Data Crawler - …` jobs from the [Admin Scheduler](http://localhost:8080/admin/scheduler/) to rebuild the index.
+> **Re-index after a major version bump**: a Fess or OpenSearch major upgrade can change the index format. If search returns errors or stops returning results after upgrading, re-crawl your repositories with `fessctl scheduler start default_crawler` to rebuild the index.
