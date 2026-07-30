@@ -12,9 +12,10 @@
 - **Fess config (`fess_config.properties`)**: `setup.sh` generates `data/fess/opt/fess/fess_config.properties` from the upstream base for the pinned Fess version plus the codesearch overlay (`conf/fess_config.overlay.properties`) and an optional local override (`conf/fess_config.local.properties`). It is mounted at `/opt/fess`, which the image places ahead of its `/etc/fess` default on the classpath, so the generated file takes effect. Only the delta is tracked in git; the base auto-tracks the pinned version. See [Configuration](#configuration).
 - **Version pins (`.env`)**: `FESS_VERSION` / `OPENSEARCH_VERSION` are the single source of truth for the image tags (`compose.yaml`) and the `fess_config.properties` base.
 - **system.properties**: The live file (`data/fess/opt/fess/system.properties`) is generated from `data/fess/opt/fess/system.properties.template` by `setup.sh` on first run. The live file is git-ignored.
-- **Theme files**: The codesearch static theme is fetched from the [fess-themes](https://github.com/codelibs/fess-themes) repository by `setup.sh` and stored in `data/fess/themes/codesearch/`. This directory is mounted into the container at `/usr/share/fess/app/themes/codesearch`.
+- **Theme files**: The codesearch static theme is fetched from the [fess-themes](https://github.com/codelibs/fess-themes) repository by `setup.sh` (re-fetched on every run; set `FESS_THEMES_SKIP_FETCH=1` to keep the local copy) and stored in `data/fess/themes/codesearch/`. This directory is mounted into the container at `/usr/share/fess/app/themes/codesearch`. The theme requires the facet fields configured in the overlay — see [Troubleshooting](#troubleshooting).
 - **index.filetype**: Source-code aware mimetype→label map, maintained in `conf/fess_config.overlay.properties` (a multi-line value, so it lives in the file rather than a `-D` flag).
 - **Management CLI (`fessctl`)**: Repositories are registered and crawls are triggered with [`fessctl`](https://github.com/codelibs/fessctl), the official Fess admin-API CLI (see [Install fessctl](#install-fessctl)).
+- **Verification (`bin/verify.sh`)**: Checks at runtime that the generated config is in effect and that the live index has the codesearch fields mapped. Run it after `setup.sh` and after any version bump (see [Verify the Setup](#verify-the-setup)).
 
 ## Getting Started
 
@@ -31,9 +32,11 @@ $ bash ./bin/setup.sh
 `setup.sh` will:
 1. Create required data directories
 2. Download the Fess data store plugin (fess-ds-git)
-3. Fetch the codesearch static theme from fess-themes (if not already present)
+3. Fetch the codesearch static theme from fess-themes
 4. Generate `data/fess/opt/fess/system.properties` from the template (if not already present)
 5. Generate `data/fess/opt/fess/fess_config.properties` from the pinned base + codesearch overlay
+
+`setup.sh` aborts on the first failure and exits non-zero. Do not start the stack after a failed run: a missing `fess_config.properties` boots a Fess that looks healthy but returns 0 hits for every search (see [Troubleshooting](#troubleshooting)).
 
 ### Start the Server
 
@@ -46,6 +49,18 @@ docker compose -f compose.yaml up -d
 Once the server is running, access it at [http://localhost:8080/](http://localhost:8080/).
 
 The first start initializes the search indices in OpenSearch (this can take a minute or two). The site has no documents until you register a repository and run a crawler (see below).
+
+### Verify the Setup
+
+The first start is also the only chance to get the index mapping right, so check it before crawling:
+
+```bash
+bash ./bin/verify.sh
+```
+
+It confirms that the generated `fess_config.properties` is in effect (including the facet allowlist the theme depends on) and that the live index really has the codesearch fields mapped. It prints the remedy for whatever it finds and exits non-zero on failure.
+
+Once documents are indexed, it also probes the search API by comparing the theme's faceted request against the same query without facets — a rejected facet field makes only the faceted count collapse to 0. Set `VERIFY_QUERY` if `test` matches nothing in your repositories.
 
 ### Create an Access Token
 
@@ -172,7 +187,53 @@ To upgrade the Fess / OpenSearch version, edit the pins in `.env` (`FESS_VERSION
 
 ```bash
 bash ./bin/setup.sh
+bash ./bin/verify.sh
 docker compose -f compose.yaml up -d
 ```
 
+`FESS_VERSION` is a `ghcr.io/codelibs/fess` image tag, and `render-fess-config.sh` maps it to the `codelibs/fess` git ref that holds the matching base config:
+
+| `FESS_VERSION` | base ref |
+|----------------|----------|
+| `15.7.0`, `15.6.1`, … | `fess-<version>` (the release tag) |
+| `15.7.0-noble`, `15.7.0-al2023` | `fess-<version>` (the OS suffix is dropped) |
+| `snapshot`, `snapshot-noble`, `snapshot-al2023`, `15.8.0-SNAPSHOT` | `master` |
+| anything else (`latest`, `15.7`, …) | **rejected** — pin an explicit release, or set `FESS_CONFIG_BASE_REF` |
+
+Floating tags are rejected on purpose: `latest` has no matching source ref, so there is no way to render a base config that is guaranteed to match the running image. For a ref this mapping does not cover — an unreleased version, or a maintenance branch — name it explicitly:
+
+```bash
+FESS_CONFIG_BASE_REF=15.8.x bash ./bin/render-fess-config.sh
+```
+
+Plugin versions are **not** derived from `FESS_VERSION` — snapshot images have no matching plugin release. Override them per plugin if the pinned one is too old, e.g. `FESS_DS_GIT_VERSION=15.8.0 bash ./bin/setup.sh`.
+
+### Index schema (`fess_indices/_codesearch`)
+
+`data/fess/usr/share/fess/app/WEB-INF/classes/fess_indices/_codesearch/` is a **hand-maintained fork** of the upstream index schema, selected by `search_engine.type=codesearch`. It carries genuine codesearch tuning that has no upstream equivalent — the `line_number_filter` char filter that strips the `L<n>:` prefix added by the handler script, code-aware `operator_filter` / `dotnum_filter` / `code_stop_filter` tokenization, and the seven codesearch document fields (`domain`, `organization`, `repository`, `path`, `repository_url`, `owner`, `homepage`).
+
+Unlike `fess_config.properties`, it is **not** regenerated per version, so it can drift from upstream. `bin/verify.sh` reports the dangerous direction (a core field the running Fess expects that the fork lacks) as an advisory `WARN`; it currently reports none for 15.7.0. Refresh it by hand when upstream adds document fields.
+
 > **Re-index after a major version bump**: a Fess or OpenSearch major upgrade can change the index format. If search returns errors or stops returning results after upgrading, re-crawl your repositories with `fessctl scheduler start default_crawler` to rebuild the index.
+
+## Troubleshooting
+
+### Search returns no results at all
+
+Every query comes back empty — from the top page, the result page and the help page alike — while the admin UI works and `fess.log` only shows:
+
+```
+WARN Main searcher failed to execute search for query: ...
+org.codelibs.fess.exception.SearchQueryException: Invalid facet field: repository
+```
+
+Run `bash ./bin/verify.sh`; it distinguishes the two causes below. Both mean the generated `data/fess/opt/fess/fess_config.properties` was not in effect (a failed or skipped `setup.sh`), because that file is what carries the codesearch settings — Fess otherwise falls back to the stock config baked into the image.
+
+1. **`query.additional.facet.fields` does not list the codesearch fields.** The theme facets on `repository`, `organization` and `filename` on every search, and Fess validates facet fields against that allowlist only — never against the index mapping. One unlisted field aborts the entire search, and older Fess versions report it as an empty result set instead of an error. Fix by re-running `setup.sh` and restarting the container.
+
+2. **The index was created without the codesearch fields.** `search_engine.type=codesearch` selects the `_codesearch` index schema, and it is read only when the index is created. If the very first boot ran on stock defaults, correcting the config later does **not** repair the index — Fess applies a mapping only to an index that has none yet. Rebuild it:
+
+   1. open [http://localhost:8080/admin/maintenance/](http://localhost:8080/admin/maintenance/) and run **Reindex**
+   2. re-crawl with `fessctl scheduler start default_crawler`
+
+   On a deployment with no documents worth keeping, deleting the `fess.*` indices and restarting `fess01` is equivalent and faster.
