@@ -106,11 +106,16 @@ for s in d.get("response", {}).get("settings", []):
         break
 ' "$name" || true)
 
+# commit_id pins the checkout to the detected branch explicitly. Left at the
+# GitDataStore default ("HEAD"), the plugin's own HEAD-resolution fallback can
+# fail against GitHub (protocol v2 sometimes doesn't advertise a HEAD symref),
+# breaking every repo whose default branch isn't literally "master".
 handler_parameter="uri=${git_url}
 base_url=${base_url}
 extractors=text/.*:textExtractor,application/xml:textExtractor,application/javascript:textExtractor,application/json:textExtractor,application/x-sh:textExtractor,application/x-bat:textExtractor,audio/.*:filenameExtractor,chemical/.*:filenameExtractor,image/.*:filenameExtractor,model/.*:filenameExtractor,video/.*:filenameExtractor,
 delete_old_docs=false
-repository_path=/home/fess/workspace/${repo}"
+repository_path=/home/fess/workspace/${repo}
+commit_id=${branch}"
 
 handler_script="url=url
 host=\"${domain}\"

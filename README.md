@@ -89,7 +89,7 @@ fessctl ping    # reports the search engine status (GREEN when ready)
 
 ### Register a Repository
 
-Create a Git data store config for each repository you want to index. The `handler-script` maps Git metadata to the codesearch fields (`organization`, `repository`, `filetype`, …) that power the search facets. Replace `codelibs` / `fess-suggest` / `master` with your own organization, repository, and default branch:
+Create a Git data store config for each repository you want to index. The `handler-script` maps Git metadata to the codesearch fields (`organization`, `repository`, `filetype`, …) that power the search facets. Replace `codelibs` / `fess-suggest` / `master` with your own organization, repository, and default branch. Set `commit_id` explicitly to that branch — left at the GitDataStore default (`HEAD`), the plugin's own HEAD-resolution fallback can fail against GitHub for repositories whose default branch isn't literally `master`:
 
 ```bash
 fessctl dataconfig create \
@@ -99,7 +99,8 @@ fessctl dataconfig create \
 base_url=https://github.com/codelibs/fess-suggest/blob/master/
 extractors=text/.*:textExtractor,application/xml:textExtractor,application/javascript:textExtractor,application/json:textExtractor,application/x-sh:textExtractor,application/x-bat:textExtractor,audio/.*:filenameExtractor,chemical/.*:filenameExtractor,image/.*:filenameExtractor,model/.*:filenameExtractor,video/.*:filenameExtractor,
 delete_old_docs=false
-repository_path=/home/fess/workspace/fess-suggest' \
+repository_path=/home/fess/workspace/fess-suggest
+commit_id=master' \
   --handler-script 'url=url
 host="github.com"
 site="github.com/codelibs/fess-suggest/" + path
