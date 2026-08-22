@@ -10,7 +10,7 @@
 # Connection/auth use fessctl's own environment variables:
 #   FESS_ENDPOINT      Fess base URL          (default: http://localhost:8080)
 #   FESS_ACCESS_TOKEN  admin-api access token (required)
-#   FESS_VERSION       Fess version           (default: 15.7.0)
+#   FESS_VERSION       Fess version           (default: 15.8.0)
 #
 # Requirements: fessctl (https://github.com/codelibs/fessctl), git, python3.
 set -euo pipefail
@@ -37,7 +37,7 @@ Options:
 Environment (consumed by fessctl):
   FESS_ENDPOINT      Fess base URL (default: http://localhost:8080)
   FESS_ACCESS_TOKEN  Admin-api access token (required)
-  FESS_VERSION       Fess version (default: 15.7.0)
+  FESS_VERSION       Fess version (default: 15.8.0)
 
 Examples:
   FESS_ACCESS_TOKEN=xxxx ./bin/register_github.sh codelibs fess-suggest
@@ -78,7 +78,7 @@ command -v git     >/dev/null 2>&1 || die "git not found."
 command -v python3 >/dev/null 2>&1 || die "python3 not found."
 [ -n "${FESS_ACCESS_TOKEN:-}" ] || die "FESS_ACCESS_TOKEN is not set (an admin-api access token)."
 : "${FESS_ENDPOINT:=http://localhost:8080}"; export FESS_ENDPOINT
-: "${FESS_VERSION:=15.7.0}";                 export FESS_VERSION
+: "${FESS_VERSION:=15.8.0}";                 export FESS_VERSION
 
 git_url="https://${domain}/${org}/${repo}.git"
 
