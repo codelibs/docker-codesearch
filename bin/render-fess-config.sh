@@ -54,7 +54,7 @@ else
     [0-9]*.[0-9]*.[0-9]*) base_ref="fess-${fess_release}" ;;
     *)
       echo "ERROR: cannot derive the fess_config.properties base ref from FESS_VERSION=${FESS_VERSION}." >&2
-      echo "       Pin an explicit release in .env (e.g. FESS_VERSION=15.7.0) - a floating tag" >&2
+      echo "       Pin an explicit release in .env (e.g. FESS_VERSION=15.8.0) - a floating tag" >&2
       echo "       such as 'latest' has no matching source ref - or set FESS_CONFIG_BASE_REF" >&2
       echo "       to the codelibs/fess ref that image was built from." >&2
       exit 1

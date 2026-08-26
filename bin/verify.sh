@@ -162,11 +162,16 @@ case "${status}" in
     if [ "${have_python}" -eq 0 ]; then
       skip "python3 not found; cannot compare record counts (HTTP 200 alone does not prove the facets worked)"
     else
+      # /api/v2/search wraps its payload in a {"response": {...}} envelope, so
+      # record_count lives one level down; fall back to the top level for the
+      # older flat shape.
       count_of() {
         curl -fsS "$1" 2>/dev/null | python3 -c '
 import json, sys
 try:
-    print(int(json.load(sys.stdin).get("record_count", -1)))
+    doc = json.load(sys.stdin)
+    body = doc.get("response", doc)
+    print(int(body.get("record_count", -1)))
 except Exception:
     print(-1)
 ' 2>/dev/null || echo -1

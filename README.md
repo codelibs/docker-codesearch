@@ -8,7 +8,7 @@
 
 ## Architecture / Theme Model
 
-- **Theme**: Fess 15.7 static theme system — `theme.default=codesearch` in `system.properties` selects the codesearch theme. No virtual-host routing is needed for theme activation.
+- **Theme**: Fess 15.8 static theme system — `theme.default=codesearch` in `system.properties` selects the codesearch theme. No virtual-host routing is needed for theme activation.
 - **Fess config (`fess_config.properties`)**: `setup.sh` generates `data/fess/opt/fess/fess_config.properties` from the upstream base for the pinned Fess version plus the codesearch overlay (`conf/fess_config.overlay.properties`) and an optional local override (`conf/fess_config.local.properties`). It is mounted at `/opt/fess`, which the image places ahead of its `/etc/fess` default on the classpath, so the generated file takes effect. Only the delta is tracked in git; the base auto-tracks the pinned version. See [Configuration](#configuration).
 - **Version pins (`.env`)**: `FESS_VERSION` / `OPENSEARCH_VERSION` are the single source of truth for the image tags (`compose.yaml`) and the `fess_config.properties` base.
 - **system.properties**: The live file (`data/fess/opt/fess/system.properties`) is generated from `data/fess/opt/fess/system.properties.template` by `setup.sh` on first run. The live file is git-ignored.
@@ -66,7 +66,7 @@ Once documents are indexed, it also probes the search API by comparing the theme
 
 `fessctl` (used in the next steps) authenticates to Fess with an access token. Create one with the `{role}admin-api` permission on the Admin Access Token page ([http://localhost:8080/admin/accesstoken/](http://localhost:8080/admin/accesstoken/)).
 
-For more details, see the [Admin Access Token Guide](https://fess.codelibs.org/15.7/admin/accesstoken-guide.html).
+For more details, see the [Admin Access Token Guide](https://fess.codelibs.org/15.8/admin/accesstoken-guide.html).
 
 ### Install fessctl
 
@@ -81,7 +81,7 @@ pipx install fessctl      # or: uv tool install fessctl
 ```bash
 export FESS_ENDPOINT=http://localhost:8080
 export FESS_ACCESS_TOKEN=<your-access-token>
-export FESS_VERSION=15.7.0
+export FESS_VERSION=15.8.0
 fessctl ping    # reports the search engine status (GREEN when ready)
 ```
 
@@ -195,26 +195,30 @@ docker compose -f compose.yaml up -d
 
 | `FESS_VERSION` | base ref |
 |----------------|----------|
-| `15.7.0`, `15.6.1`, … | `fess-<version>` (the release tag) |
-| `15.7.0-noble`, `15.7.0-al2023` | `fess-<version>` (the OS suffix is dropped) |
-| `snapshot`, `snapshot-noble`, `snapshot-al2023`, `15.8.0-SNAPSHOT` | `master` |
-| anything else (`latest`, `15.7`, …) | **rejected** — pin an explicit release, or set `FESS_CONFIG_BASE_REF` |
+| `15.8.0`, `15.7.0`, … | `fess-<version>` (the release tag) |
+| `15.8.0-noble`, `15.8.0-al2023` | `fess-<version>` (the OS suffix is dropped) |
+| `snapshot`, `snapshot-noble`, `snapshot-al2023`, `15.9.0-SNAPSHOT` | `master` |
+| anything else (`latest`, `15.8`, …) | **rejected** — pin an explicit release, or set `FESS_CONFIG_BASE_REF` |
 
 Floating tags are rejected on purpose: `latest` has no matching source ref, so there is no way to render a base config that is guaranteed to match the running image. For a ref this mapping does not cover — an unreleased version, or a maintenance branch — name it explicitly:
 
 ```bash
-FESS_CONFIG_BASE_REF=15.8.x bash ./bin/render-fess-config.sh
+FESS_CONFIG_BASE_REF=15.9.x bash ./bin/render-fess-config.sh
 ```
 
-Plugin versions are **not** derived from `FESS_VERSION` — snapshot images have no matching plugin release. Override them per plugin if the pinned one is too old, e.g. `FESS_DS_GIT_VERSION=15.8.0 bash ./bin/setup.sh`.
+Plugin versions are **not** derived from `FESS_VERSION` — snapshot images have no matching plugin release. Override them per plugin if the pinned one is too old, e.g. `FESS_DS_GIT_VERSION=15.9.0 bash ./bin/setup.sh`.
+
+Plugin jars are downloaded from `https://maven.codelibs.org/release`, where Fess plugins are published from the 15.8 line on. Releases up to 15.7.0 are on Maven Central instead, so pinning an older plugin also needs `FESS_PLUGIN_REPO_URL=https://repo1.maven.org/maven2`.
 
 ### Index schema (`fess_indices/_codesearch`)
 
 `data/fess/usr/share/fess/app/WEB-INF/classes/fess_indices/_codesearch/` is a **hand-maintained fork** of the upstream index schema, selected by `search_engine.type=codesearch`. It carries genuine codesearch tuning that has no upstream equivalent — the `line_number_filter` char filter that strips the `L<n>:` prefix added by the handler script, code-aware `operator_filter` / `dotnum_filter` / `code_stop_filter` tokenization, and the seven codesearch document fields (`domain`, `organization`, `repository`, `path`, `repository_url`, `owner`, `homepage`).
 
-Unlike `fess_config.properties`, it is **not** regenerated per version, so it can drift from upstream. `bin/verify.sh` reports the dangerous direction (a core field the running Fess expects that the fork lacks) as an advisory `WARN`; it currently reports none for 15.7.0. Refresh it by hand when upstream adds document fields.
+Unlike `fess_config.properties`, it is **not** regenerated per version, so it can drift from upstream. `bin/verify.sh` reports the dangerous direction (a core field the running Fess expects that the fork lacks) as an advisory `WARN`; it currently reports none for 15.8.0. Refresh it by hand when upstream adds document fields.
 
-> **Re-index after a major version bump**: a Fess or OpenSearch major upgrade can change the index format. If search returns errors or stops returning results after upgrading, re-crawl your repositories with `fessctl scheduler start default_crawler` to rebuild the index.
+The 15.8 refresh carries over the semantic-chunk mapping Fess 15.8 ships unconditionally: `index.knn` in `fess.json` and the `content_chunk_vector` / `content_chunk_status` document fields. Codesearch does not use semantic search — the `content-chunk-vector-indexer` job and `content_chunker.search.enabled` are both off by default — but the mapping is only ever applied to a brand-new index, so shipping it now is what keeps enabling it later from requiring a full re-crawl. It does make the k-NN plugin a hard requirement; `ghcr.io/codelibs/fess-opensearch` bundles it.
+
+> **Re-index after a major version bump**: a Fess or OpenSearch major upgrade can change the index format. If search returns errors or stops returning results after upgrading, re-crawl your repositories with `fessctl scheduler start default_crawler` to rebuild the index. An index created by an older version keeps its original mapping — Fess applies a mapping only to an index that has none yet — so an in-place upgrade will not pick up the fields above until the index is rebuilt.
 
 ## Troubleshooting
 

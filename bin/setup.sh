@@ -12,11 +12,17 @@ set -euo pipefail
 base_dir=$(cd "$(dirname "$0")";cd ..;pwd)
 # fess-script-groovy is no longer downloaded: the Groovy script engine is
 # bundled in Fess core since 15.0.
-# Override a version with e.g. FESS_DS_GIT_VERSION=15.8.0 (these are not
+# Override a version with e.g. FESS_DS_GIT_VERSION=15.9.0 (these are not
 # derived from FESS_VERSION: snapshot images have no matching release plugin).
 fess_plugins="
-fess-ds-git:${FESS_DS_GIT_VERSION:-15.7.0}
+fess-ds-git:${FESS_DS_GIT_VERSION:-15.8.0}
 "
+
+# Maven repository the plugin jars are downloaded from. Fess plugins moved off
+# Maven Central with the 15.8 line, so releases from 15.8.0 on are only on
+# maven.codelibs.org; point this at https://repo1.maven.org/maven2 to pull an
+# older one.
+fess_plugin_repo_url="${FESS_PLUGIN_REPO_URL:-https://maven.codelibs.org/release}"
 
 # fess-themes branch to fetch the codesearch static theme from (default: main).
 # Override with FESS_THEMES_BRANCH=<branch> to test theme changes from another branch.
@@ -53,7 +59,7 @@ for fess_plugin in ${fess_plugins} ; do
   plugin_version=$(echo "$fess_plugin" | sed -e "s/.*://")
   plugin_jar=${plugin_name}-${plugin_version}.jar
   plugin_file=${plugin_dir}/${plugin_jar}
-  plugin_url=https://repo1.maven.org/maven2/org/codelibs/fess/${plugin_name}/${plugin_version}/${plugin_jar}
+  plugin_url=${fess_plugin_repo_url}/org/codelibs/fess/${plugin_name}/${plugin_version}/${plugin_jar}
   echo "Downloading ${plugin_name} version ${plugin_version}..."
   # -f, or a 404 page gets written out as a .jar that Fess then fails to load.
   if ! curl -fsSL "${plugin_url}" -o "${plugin_file}.tmp"; then
@@ -61,6 +67,8 @@ for fess_plugin in ${fess_plugins} ; do
     echo "ERROR: could not download ${plugin_name} ${plugin_version} from" >&2
     echo "       ${plugin_url}" >&2
     echo "       Check the version (see FESS_DS_GIT_VERSION in this script)." >&2
+    echo "       Plugin releases before 15.8.0 are on Maven Central instead:" >&2
+    echo "       FESS_PLUGIN_REPO_URL=https://repo1.maven.org/maven2" >&2
     exit 1
   fi
   if ! unzip -tq "${plugin_file}.tmp" > /dev/null 2>&1; then

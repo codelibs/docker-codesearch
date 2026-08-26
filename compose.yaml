@@ -25,7 +25,7 @@ services:
       - ./data/fess/usr/share/fess/app/WEB-INF/plugin:/usr/share/fess/app/WEB-INF/plugin
       - ./data/fess/usr/share/fess/app/WEB-INF/classes/fess_indices/_codesearch:/usr/share/fess/app/WEB-INF/classes/fess_indices/_codesearch
       # Static theme fetched from fess-themes by setup.sh; mounted at the Fess app
-      # themes dir (served at /themes/codesearch by the 15.7 container).
+      # themes dir (served at /themes/codesearch by the 15.8 container).
       - ./data/fess/themes/codesearch:/usr/share/fess/app/themes/codesearch
     logging:
       driver: "json-file"
