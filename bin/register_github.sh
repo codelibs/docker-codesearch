@@ -28,7 +28,7 @@ Arguments:
 
 Options:
   -d, --domain HOST  Repository host (default: github.com)
-  -b, --branch NAME  Default branch for source links (default: auto-detect)
+  -b, --branch NAME  Branch to crawl and link to (default: auto-detect)
       --owner NAME   "owner" metadata for the documents (optional)
       --homepage URL "homepage" metadata for the documents (optional)
       --no-crawl     Register the data store only; do not start the crawler
@@ -106,8 +106,13 @@ for s in d.get("response", {}).get("settings", []):
         break
 ' "$name" || true)
 
+# commit_id pins the crawl to the same branch base_url links to. Left unset,
+# GitDataStore resolves the remote's default branch on its own, so --branch would
+# only relabel the source links while the crawl still followed the default branch --
+# indexing content from one ref under URLs that point at another.
 handler_parameter="uri=${git_url}
 base_url=${base_url}
+commit_id=${branch}
 extractors=text/.*:textExtractor,application/xml:textExtractor,application/javascript:textExtractor,application/json:textExtractor,application/x-sh:textExtractor,application/x-bat:textExtractor,audio/.*:filenameExtractor,chemical/.*:filenameExtractor,image/.*:filenameExtractor,model/.*:filenameExtractor,video/.*:filenameExtractor,
 delete_old_docs=false
 repository_path=/home/fess/workspace/${repo}"
