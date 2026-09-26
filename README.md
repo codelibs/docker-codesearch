@@ -198,8 +198,10 @@ docker compose -f compose.yaml up -d
 |----------------|----------|
 | `15.8.0`, `15.7.0`, … | `fess-<version>` (the release tag) |
 | `15.8.0-noble`, `15.8.0-al2023` | `fess-<version>` (the OS suffix is dropped) |
-| `snapshot`, `snapshot-noble`, `snapshot-al2023`, `15.9.0-SNAPSHOT` | `master` |
+| `snapshot`, `snapshot-noble`, `snapshot-al2023`, `15.9.0-SNAPSHOT` | `main` |
 | anything else (`latest`, `15.8`, …) | **rejected** — pin an explicit release, or set `FESS_CONFIG_BASE_REF` |
+
+An exported `FESS_VERSION` takes precedence over `.env` in `render-fess-config.sh`, `register_github.sh` and `migrate-to-javascript.sh`, just as it does for `docker compose`, so a one-off run against another image needs no edit to `.env`: `FESS_VERSION=snapshot bash ./bin/setup.sh`. `fessctl` only accepts a numeric version, so the two fessctl wrappers drop an image-tag suffix (`15.9.0-SNAPSHOT` → `15.9.0`) and reject `snapshot`; run them with an explicit version such as `FESS_VERSION=15.9.0`.
 
 Floating tags are rejected on purpose: `latest` has no matching source ref, so there is no way to render a base config that is guaranteed to match the running image. For a ref this mapping does not cover — an unreleased version, or a maintenance branch — name it explicitly:
 
@@ -207,9 +209,32 @@ Floating tags are rejected on purpose: `latest` has no matching source ref, so t
 FESS_CONFIG_BASE_REF=15.9.x bash ./bin/render-fess-config.sh
 ```
 
-Plugin versions are **not** derived from `FESS_VERSION` — snapshot images have no matching plugin release. Override them per plugin if the pinned one is too old, e.g. `FESS_DS_GIT_VERSION=15.9.0 bash ./bin/setup.sh`.
+Plugin versions are **not** derived from `FESS_VERSION` — snapshot images have no matching plugin release. Override them per plugin if the pinned one is too old, e.g. `FESS_DS_GIT_VERSION=15.9.0 bash ./bin/setup.sh`. A `-SNAPSHOT` version (`FESS_DS_GIT_VERSION=15.9.0-SNAPSHOT`) is resolved to its newest build in `https://maven.codelibs.org/snapshot` (`FESS_PLUGIN_SNAPSHOT_REPO_URL`).
 
 Plugin jars are downloaded from `https://maven.codelibs.org/release`, where Fess plugins are published from the 15.8 line on. Releases up to 15.7.0 are on Maven Central instead, so pinning an older plugin also needs `FESS_PLUGIN_REPO_URL=https://repo1.maven.org/maven2`.
+
+### Upgrading from Fess 15.8 to 15.9
+
+Fess 15.9 moved the Groovy script engine out of core into the `fess-script-groovy` plugin and made JavaScript the default script type. An upgrade does not rewrite stored settings, so a 15.8 install keeps Groovy on all of its scheduled jobs, and the data configs `register_github.sh` created on 15.8 carry no `script_type` — which also means Groovy. This deployment does not install `fess-script-groovy` (the `WEB-INF/plugin` bind mount hides the copy baked into the image, and `setup.sh` removes plugin jars it did not download), so on 15.9 those settings cannot run: the Default Crawler ends with `fail`, and `fess.log` shows `Settings use the script engine groovy, which is not registered` at startup and `groovy is not found` per job.
+
+Switch them to JavaScript once, right after the upgrade:
+
+```bash
+# 1. set FESS_VERSION=15.9.x in .env, then
+bash ./bin/setup.sh
+docker compose -f compose.yaml up -d
+# 2. once Fess is up (the documents in the index are kept as they are)
+bash ./bin/migrate-to-javascript.sh --dry-run   # lists what would change
+bash ./bin/migrate-to-javascript.sh
+docker compose -f compose.yaml restart fess01   # optional: clears the startup warning
+```
+
+`migrate-to-javascript.sh` uses `fessctl` (same `FESS_ENDPOINT` / `FESS_ACCESS_TOKEN` as above) and:
+
+* sets every scheduled job whose script type is Groovy to JavaScript. The two Groovy-only constructs in the bundled 15.8 jobs are rewritten on the way — the `1000L` long literal in *Thumbnail Purger* and the `org.opensearch` package Fess 15.9 renamed in *Index Exporter* — so the result is the job set Fess 15.9 ships;
+* adds `script_type=javascript` to the Parameter of every data config that has none (or `groovy`). The handler script `register_github.sh` writes is valid JavaScript as is.
+
+It prints every setting it changes. A job or handler script you customized with other Groovy syntax is switched as well and has to be rewritten by hand. The alternative is to keep Groovy: add `fess-script-groovy` to `fess_plugins` in `setup.sh`. On 15.9, `register_github.sh` records `script_type=javascript` itself, so repositories registered after the upgrade need nothing.
 
 ### Index schema (`fess_indices/_codesearch`)
 

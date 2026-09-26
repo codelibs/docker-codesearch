@@ -10,7 +10,7 @@
 # Connection/auth use fessctl's own environment variables:
 #   FESS_ENDPOINT      Fess base URL          (default: http://localhost:8080)
 #   FESS_ACCESS_TOKEN  admin-api access token (required)
-#   FESS_VERSION       Fess version           (default: 15.8.0)
+#   FESS_VERSION       Fess version           (default: FESS_VERSION in .env)
 #
 # Requirements: fessctl (https://github.com/codelibs/fessctl), git, python3.
 set -euo pipefail
@@ -37,7 +37,8 @@ Options:
 Environment (consumed by fessctl):
   FESS_ENDPOINT      Fess base URL (default: http://localhost:8080)
   FESS_ACCESS_TOKEN  Admin-api access token (required)
-  FESS_VERSION       Fess version (default: 15.8.0)
+  FESS_VERSION       Fess version (default: FESS_VERSION in .env; an image-tag
+                     suffix such as -noble or -SNAPSHOT is dropped for fessctl)
 
 Examples:
   FESS_ACCESS_TOKEN=xxxx ./bin/register_github.sh codelibs fess-suggest
@@ -78,7 +79,16 @@ command -v git     >/dev/null 2>&1 || die "git not found."
 command -v python3 >/dev/null 2>&1 || die "python3 not found."
 [ -n "${FESS_ACCESS_TOKEN:-}" ] || die "FESS_ACCESS_TOKEN is not set (an admin-api access token)."
 : "${FESS_ENDPOINT:=http://localhost:8080}"; export FESS_ENDPOINT
-: "${FESS_VERSION:=15.8.0}";                 export FESS_VERSION
+# fessctl selects its API flavour from FESS_VERSION and accepts only <x.y.z>, while
+# compose uses the same variable as an image tag. Default to the .env pin and drop
+# an image-tag suffix (15.8.0-noble, 15.9.0-SNAPSHOT) so both can share it.
+base_dir=$(cd "$(dirname "$0")/.." && pwd)
+[ -n "${FESS_VERSION:-}" ] || FESS_VERSION=$(sed -n 's/^FESS_VERSION=//p' "${base_dir}/.env" 2>/dev/null | tail -1)
+FESS_VERSION="${FESS_VERSION%%-*}"
+case "$FESS_VERSION" in
+  [0-9]*.[0-9]*) export FESS_VERSION ;;
+  *) die "fessctl needs a numeric FESS_VERSION (e.g. 15.9.0), not '${FESS_VERSION}'." ;;
+esac
 
 git_url="https://${domain}/${org}/${repo}.git"
 
@@ -116,6 +126,14 @@ commit_id=${branch}
 extractors=text/.*:textExtractor,application/xml:textExtractor,application/javascript:textExtractor,application/json:textExtractor,application/x-sh:textExtractor,application/x-bat:textExtractor,audio/.*:filenameExtractor,chemical/.*:filenameExtractor,image/.*:filenameExtractor,model/.*:filenameExtractor,video/.*:filenameExtractor,
 delete_old_docs=false
 repository_path=/home/fess/workspace/${repo}"
+# The handler script below is valid JavaScript and Groovy alike. Fess 15.9 ships
+# JavaScript in core and Groovy only as a plugin, so name the type explicitly
+# there (an unset type means Groovy). 15.8 has no JavaScript engine and runs it
+# as Groovy, its default.
+if [ "$(printf '%s\n' 15.9 "$FESS_VERSION" | sort -V | head -1)" = "15.9" ]; then
+  handler_parameter="${handler_parameter}
+script_type=javascript"
+fi
 
 handler_script="url=url
 host=\"${domain}\"

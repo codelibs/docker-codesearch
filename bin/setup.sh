@@ -21,8 +21,9 @@ fess-ds-git:${FESS_DS_GIT_VERSION:-15.8.0}
 # Maven repository the plugin jars are downloaded from. Fess plugins moved off
 # Maven Central with the 15.8 line, so releases from 15.8.0 on are only on
 # maven.codelibs.org; point this at https://repo1.maven.org/maven2 to pull an
-# older one.
+# older one. A -SNAPSHOT version is fetched from the snapshot repository instead.
 fess_plugin_repo_url="${FESS_PLUGIN_REPO_URL:-https://maven.codelibs.org/release}"
+fess_plugin_snapshot_repo_url="${FESS_PLUGIN_SNAPSHOT_REPO_URL:-https://maven.codelibs.org/snapshot}"
 
 # fess-themes branch to fetch the codesearch static theme from (default: main).
 # Override with FESS_THEMES_BRANCH=<branch> to test theme changes from another branch.
@@ -60,6 +61,24 @@ for fess_plugin in ${fess_plugins} ; do
   plugin_jar=${plugin_name}-${plugin_version}.jar
   plugin_file=${plugin_dir}/${plugin_jar}
   plugin_url=${fess_plugin_repo_url}/org/codelibs/fess/${plugin_name}/${plugin_version}/${plugin_jar}
+  case "${plugin_version}" in
+    *-SNAPSHOT)
+      # A snapshot repository holds only timestamped jars; the newest one is named
+      # by <snapshot><timestamp>/<buildNumber> in the version's maven-metadata.xml.
+      plugin_version_dir=${fess_plugin_snapshot_repo_url}/org/codelibs/fess/${plugin_name}/${plugin_version}
+      if ! plugin_metadata=$(curl -fsSL "${plugin_version_dir}/maven-metadata.xml"); then
+        echo "ERROR: could not read ${plugin_version_dir}/maven-metadata.xml" >&2
+        exit 1
+      fi
+      snapshot_timestamp=$(printf '%s\n' "${plugin_metadata}" | sed -n 's|.*<timestamp>\(.*\)</timestamp>.*|\1|p' | head -1)
+      snapshot_build=$(printf '%s\n' "${plugin_metadata}" | sed -n 's|.*<buildNumber>\(.*\)</buildNumber>.*|\1|p' | head -1)
+      [ -n "${snapshot_timestamp}" ] && [ -n "${snapshot_build}" ] || {
+        echo "ERROR: no snapshot build listed in ${plugin_version_dir}/maven-metadata.xml" >&2
+        exit 1
+      }
+      plugin_url=${plugin_version_dir}/${plugin_name}-${plugin_version%-SNAPSHOT}-${snapshot_timestamp}-${snapshot_build}.jar
+      ;;
+  esac
   echo "Downloading ${plugin_name} version ${plugin_version}..."
   # -f, or a 404 page gets written out as a .jar that Fess then fails to load.
   if ! curl -fsSL "${plugin_url}" -o "${plugin_file}.tmp"; then

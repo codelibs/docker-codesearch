@@ -20,9 +20,10 @@ set -euo pipefail
 
 base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# --- version: single source of truth is .env ---
-# shellcheck disable=SC1091
-[ -f "${base_dir}/.env" ] && . "${base_dir}/.env"
+# --- version: .env pins it; an exported FESS_VERSION wins, as it does for compose ---
+if [ -z "${FESS_VERSION:-}" ] && [ -f "${base_dir}/.env" ]; then
+  FESS_VERSION="$(sed -n 's/^FESS_VERSION=//p' "${base_dir}/.env" | tail -1)"
+fi
 : "${FESS_VERSION:?FESS_VERSION must be set (in .env)}"
 
 overlay="${base_dir}/conf/fess_config.overlay.properties"
@@ -50,7 +51,7 @@ else
     *-*) fess_release="${fess_release%%-*}" ;;
   esac
   case "${fess_release}" in
-    snapshot) base_ref="master" ;;
+    snapshot) base_ref="main" ;;
     [0-9]*.[0-9]*.[0-9]*) base_ref="fess-${fess_release}" ;;
     *)
       echo "ERROR: cannot derive the fess_config.properties base ref from FESS_VERSION=${FESS_VERSION}." >&2
