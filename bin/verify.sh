@@ -231,7 +231,7 @@ print("DUPS " + " ".join(dups) if dups else "DUPS")
       pass "the codesearch schema has every core field of codelibs/fess@${schema_ref}"
     fi
     if [ -n "${schema_dups}" ]; then
-      warn "duplicate dynamic_templates names in the codesearch schema: ${schema_dups} (one of each pair is ignored)"
+      warn "duplicate dynamic_templates names in the codesearch schema: ${schema_dups} (OpenSearch still applies every entry, but the names should be unique and match upstream)"
     fi
   fi
 fi
