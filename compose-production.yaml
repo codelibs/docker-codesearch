@@ -22,5 +22,5 @@ services:
 
   search01:
     environment:
-      ES_JAVA_OPTS: -Xms3g -Xmx3g
+      OPENSEARCH_JAVA_OPTS: -Xms3g -Xmx3g
 
