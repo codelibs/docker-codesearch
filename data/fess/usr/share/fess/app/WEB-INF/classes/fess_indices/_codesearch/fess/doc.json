@@ -569,6 +569,17 @@
         "type": "date",
         "format": "date_optional_time"
       },
+      "etag": {
+        "type": "keyword",
+        "index": false,
+        "doc_values": false
+      },
+      "owner": {
+        "type": "keyword"
+      },
+      "last_modifier": {
+        "type": "keyword"
+      },
       "location": {
         "type": "geo_point"
       },
@@ -582,6 +593,9 @@
         "type": "keyword"
       },
       "label": {
+        "type": "keyword"
+      },
+      "tag": {
         "type": "keyword"
       },
       "virtual_host": {
@@ -618,9 +632,6 @@
         "type": "keyword"
       },
       "repository_url": {
-        "type": "keyword"
-      },
-      "owner": {
         "type": "keyword"
       },
       "homepage": {
