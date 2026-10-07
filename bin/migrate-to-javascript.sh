@@ -90,13 +90,26 @@ def fessctl(*args):
     return response
 
 def list_all(resource):
-    settings, page = [], 1
+    # A fessctl that sends --page/--size as URL parameters gets the first page of the
+    # server's default size on every call (the Fess 15.9 admin list API reads only a
+    # JSON body). Count each id once and stop on a page that adds none, instead of
+    # reading the same entries again and missing the rest.
+    settings, seen, page = [], set(), 1
     while True:
         response = fessctl(resource, "list", "--page", str(page), "--size", "100")
-        batch = response.get("settings", [])
-        settings += batch
-        if not batch or len(settings) >= int(response.get("total", 0)):
+        total = int(response.get("total", 0))
+        before = len(settings)
+        for setting in response.get("settings", []):
+            if setting["id"] not in seen:
+                seen.add(setting["id"])
+                settings.append(setting)
+        if len(settings) >= total:
             return settings
+        if len(settings) == before:
+            sys.exit("Error: listing %s read %d of %d entries, and page %d added no new entry. "
+                     "The installed fessctl most likely does not apply --size/--page, so every call returns the first page. "
+                     "Upgrade fessctl, or reduce the number of %s entries to one page (25 by default), then run again."
+                     % (resource, len(settings), total, page, resource))
         page += 1
 
 def is_groovy(script_type):
@@ -108,9 +121,14 @@ def to_javascript(script):
     # Fess 15.9 dropped the OpenSearch jar for its own fork of the same classes.
     return re.sub(r"\borg\.opensearch\.", "org.codelibs.fesen.opensearch.", script)
 
+# Read both lists before changing anything, so a listing failure cannot leave
+# the jobs migrated and the data configs not.
+jobs = list_all("scheduler")
+configs = list_all("dataconfig")
+
 changed = 0
 
-for job in list_all("scheduler"):
+for job in jobs:
     if not is_groovy(job.get("script_type")):
         continue
     old, new = job.get("script_data") or "", to_javascript(job.get("script_data") or "")
@@ -121,7 +139,7 @@ for job in list_all("scheduler"):
         fessctl("scheduler", "update", job["id"], "--script-type", "javascript", "--script-data", new)
     changed += 1
 
-for config in list_all("dataconfig"):
+for config in configs:
     params = config.get("handler_parameter") or ""
     lines = params.splitlines()
     types = [l.split("=", 1)[1] for l in lines if l.split("=", 1)[0].strip() == "script_type" and "=" in l]
