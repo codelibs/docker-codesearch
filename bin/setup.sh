@@ -15,7 +15,7 @@ base_dir=$(cd "$(dirname "$0")";cd ..;pwd)
 # Override a version with e.g. FESS_DS_GIT_VERSION=15.9.0 (these are not
 # derived from FESS_VERSION: snapshot images have no matching release plugin).
 fess_plugins="
-fess-ds-git:${FESS_DS_GIT_VERSION:-15.8.0}
+fess-ds-git:${FESS_DS_GIT_VERSION:-15.9.0}
 "
 
 # Maven repository the plugin jars are downloaded from. Fess plugins moved off
