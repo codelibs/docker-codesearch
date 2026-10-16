@@ -66,7 +66,7 @@ Once documents are indexed, it also probes the search API by comparing the theme
 
 `fessctl` (used in the next steps) authenticates to Fess with an access token. Create one with the `{role}admin-api` permission on the Admin Access Token page ([http://localhost:8080/admin/accesstoken/](http://localhost:8080/admin/accesstoken/)).
 
-For more details, see the [Admin Access Token Guide](https://fess.codelibs.org/15.8/admin/accesstoken-guide.html).
+For more details, see the [Admin Access Token Guide](https://fess.codelibs.org/15.9/admin/accesstoken-guide.html).
 
 ### Install fessctl
 
@@ -81,7 +81,7 @@ pipx install fessctl      # or: uv tool install fessctl
 ```bash
 export FESS_ENDPOINT=http://localhost:8080
 export FESS_ACCESS_TOKEN=<your-access-token>
-export FESS_VERSION=15.8.0
+export FESS_VERSION=15.9.0
 fessctl ping    # reports the search engine status (GREEN when ready)
 ```
 
@@ -196,8 +196,8 @@ docker compose -f compose.yaml up -d
 
 | `FESS_VERSION` | base ref |
 |----------------|----------|
-| `15.8.0`, `15.7.0`, … | `fess-<version>` (the release tag) |
-| `15.8.0-noble`, `15.8.0-al2023` | `fess-<version>` (the OS suffix is dropped) |
+| `15.9.0`, `15.8.0`, … | `fess-<version>` (the release tag) |
+| `15.9.0-noble`, `15.9.0-al2023` | `fess-<version>` (the OS suffix is dropped) |
 | `snapshot`, `snapshot-noble`, `snapshot-al2023`, `15.9.0-SNAPSHOT` | `main` |
 | anything else (`latest`, `15.8`, …) | **rejected** — pin an explicit release, or set `FESS_CONFIG_BASE_REF` |
 
