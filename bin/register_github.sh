@@ -81,13 +81,17 @@ command -v python3 >/dev/null 2>&1 || die "python3 not found."
 : "${FESS_ENDPOINT:=http://localhost:8080}"; export FESS_ENDPOINT
 # fessctl selects its API flavour from FESS_VERSION and accepts only <x.y.z>, while
 # compose uses the same variable as an image tag. Default to the .env pin and drop
-# an image-tag suffix (15.8.0-noble, 15.9.0-SNAPSHOT) so both can share it.
+# an image-tag suffix (15.9.0-noble) so both can share it. A snapshot tag maps to
+# the development line (15.10.0); update that number when main moves on.
 base_dir=$(cd "$(dirname "$0")/.." && pwd)
 [ -n "${FESS_VERSION:-}" ] || FESS_VERSION=$(sed -n 's/^FESS_VERSION=//p' "${base_dir}/.env" 2>/dev/null | tail -1)
-FESS_VERSION="${FESS_VERSION%%-*}"
+case "$FESS_VERSION" in
+  snapshot | snapshot-* | *-SNAPSHOT | *-snapshot) FESS_VERSION="15.10.0" ;; # the development line
+  *) FESS_VERSION="${FESS_VERSION%%-*}" ;;
+esac
 case "$FESS_VERSION" in
   [0-9]*.[0-9]*) export FESS_VERSION ;;
-  *) die "fessctl needs a numeric FESS_VERSION (e.g. 15.9.0), not '${FESS_VERSION}'." ;;
+  *) die "fessctl needs a numeric FESS_VERSION (e.g. 15.9.0) or a snapshot tag, not '${FESS_VERSION}'." ;;
 esac
 
 git_url="https://${domain}/${org}/${repo}.git"

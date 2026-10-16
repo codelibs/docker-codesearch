@@ -81,7 +81,7 @@ pipx install fessctl      # or: uv tool install fessctl
 ```bash
 export FESS_ENDPOINT=http://localhost:8080
 export FESS_ACCESS_TOKEN=<your-access-token>
-export FESS_VERSION=15.9.0
+export FESS_VERSION=15.9.0   # or snapshot for the development build
 fessctl ping    # reports the search engine status (GREEN when ready)
 ```
 
@@ -198,10 +198,10 @@ docker compose -f compose.yaml up -d
 |----------------|----------|
 | `15.9.0`, `15.8.0`, … | `fess-<version>` (the release tag) |
 | `15.9.0-noble`, `15.9.0-al2023` | `fess-<version>` (the OS suffix is dropped) |
-| `snapshot`, `snapshot-noble`, `snapshot-al2023`, `15.9.0-SNAPSHOT` | `main` |
+| `snapshot`, `snapshot-noble`, `snapshot-al2023`, `15.10.0-SNAPSHOT` | `main` |
 | anything else (`latest`, `15.8`, …) | **rejected** — pin an explicit release, or set `FESS_CONFIG_BASE_REF` |
 
-An exported `FESS_VERSION` takes precedence over `.env` in `render-fess-config.sh`, `register_github.sh` and `migrate-to-javascript.sh`, just as it does for `docker compose`, so a one-off run against another image needs no edit to `.env`: `FESS_VERSION=snapshot bash ./bin/setup.sh`. `fessctl` only accepts a numeric version, so the two fessctl wrappers drop an image-tag suffix (`15.9.0-SNAPSHOT` → `15.9.0`) and reject `snapshot`; run them with an explicit version such as `FESS_VERSION=15.9.0`.
+An exported `FESS_VERSION` takes precedence over `.env` in `render-fess-config.sh`, `register_github.sh` and `migrate-to-javascript.sh`, just as it does for `docker compose`, so a one-off run against another image needs no edit to `.env`: `FESS_VERSION=snapshot bash ./bin/setup.sh`. `fessctl` only accepts a numeric version, so the two fessctl wrappers drop an image-tag suffix (`15.9.0-noble` → `15.9.0`) and map every snapshot tag to the development line (`15.10.0`); to target a release, run them with an explicit version such as `FESS_VERSION=15.9.0`.
 
 Floating tags are rejected on purpose: `latest` has no matching source ref, so there is no way to render a base config that is guaranteed to match the running image. For a ref this mapping does not cover — an unreleased version, or a maintenance branch — name it explicitly:
 
@@ -209,7 +209,7 @@ Floating tags are rejected on purpose: `latest` has no matching source ref, so t
 FESS_CONFIG_BASE_REF=15.9.x bash ./bin/render-fess-config.sh
 ```
 
-Plugin versions are **not** derived from `FESS_VERSION` — snapshot images have no matching plugin release. Override them per plugin if the pinned one is too old, e.g. `FESS_DS_GIT_VERSION=15.9.0 bash ./bin/setup.sh`. A `-SNAPSHOT` version (`FESS_DS_GIT_VERSION=15.9.0-SNAPSHOT`) is resolved to its newest build in `https://maven.codelibs.org/snapshot` (`FESS_PLUGIN_SNAPSHOT_REPO_URL`).
+Plugin versions are **not** derived from `FESS_VERSION` — snapshot images have no matching plugin release. Override them per plugin if the pinned one is too old, e.g. `FESS_DS_GIT_VERSION=15.9.0 bash ./bin/setup.sh`. A `-SNAPSHOT` version (`FESS_DS_GIT_VERSION=15.10.0-SNAPSHOT`) is resolved to its newest build in `https://maven.codelibs.org/snapshot` (`FESS_PLUGIN_SNAPSHOT_REPO_URL`).
 
 Plugin jars are downloaded from `https://maven.codelibs.org/release`, where Fess plugins are published from the 15.8 line on. Releases up to 15.7.0 are on Maven Central instead, so pinning an older plugin also needs `FESS_PLUGIN_REPO_URL=https://repo1.maven.org/maven2`.
 
