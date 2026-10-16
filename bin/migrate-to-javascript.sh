@@ -64,10 +64,13 @@ command -v python3 >/dev/null 2>&1 || die "python3 not found."
 # drop an image-tag suffix, since fessctl accepts only <x.y.z>.
 base_dir=$(cd "$(dirname "$0")/.." && pwd)
 [ -n "${FESS_VERSION:-}" ] || FESS_VERSION=$(sed -n 's/^FESS_VERSION=//p' "${base_dir}/.env" 2>/dev/null | tail -1)
-FESS_VERSION="${FESS_VERSION%%-*}"
+case "$FESS_VERSION" in
+  snapshot | snapshot-* | *-SNAPSHOT | *-snapshot) FESS_VERSION="15.10.0" ;; # the development line
+  *) FESS_VERSION="${FESS_VERSION%%-*}" ;;
+esac
 case "$FESS_VERSION" in
   [0-9]*.[0-9]*) export FESS_VERSION ;;
-  *) die "fessctl needs a numeric FESS_VERSION (e.g. 15.9.0), not '${FESS_VERSION}'." ;;
+  *) die "fessctl needs a numeric FESS_VERSION (e.g. 15.9.0) or a snapshot tag, not '${FESS_VERSION}'." ;;
 esac
 # Fess 15.8 and earlier have no JavaScript engine: switching there breaks every job.
 [ "$(printf '%s\n' 15.9 "$FESS_VERSION" | sort -V | head -1)" = "15.9" ] \
