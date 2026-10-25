@@ -10,11 +10,11 @@
 
 ## Architecture / Theme Model
 
-- **Theme**: Fess 15.8 static theme system — `theme.default=codesearch` in `system.properties` selects the codesearch theme. No virtual-host routing is needed for theme activation.
+- **Theme**: Fess 15.8 theme system — `theme.default=codesearch` in `system.properties` selects the codesearch theme. No virtual-host routing is needed for theme activation.
 - **Fess config (`fess_config.properties`)**: `setup.sh` generates `data/fess/opt/fess/fess_config.properties` from the upstream base for the pinned Fess version plus the codesearch overlay (`conf/fess_config.overlay.properties`) and an optional local override (`conf/fess_config.local.properties`). It is mounted at `/opt/fess`, which the image places ahead of its `/etc/fess` default on the classpath, so the generated file takes effect. Only the delta is tracked in git; the base auto-tracks the pinned version. See [Configuration](#configuration).
 - **Version pins (`.env`)**: `FESS_VERSION` / `OPENSEARCH_VERSION` are the single source of truth for the image tags (`compose.yaml`) and the `fess_config.properties` base.
 - **system.properties**: The live file (`data/fess/opt/fess/system.properties`) is generated from `data/fess/opt/fess/system.properties.template` by `setup.sh` on first run. The live file is git-ignored.
-- **Theme files**: The codesearch static theme is fetched from the [fess-themes](https://github.com/codelibs/fess-themes) repository by `setup.sh` (re-fetched on every run; set `FESS_THEMES_SKIP_FETCH=1` to keep the local copy) and stored in `data/fess/themes/codesearch/`. This directory is mounted into the container at `/usr/share/fess/app/themes/codesearch`. The theme requires the facet fields configured in the overlay — see [Troubleshooting](#troubleshooting).
+- **Theme files**: The codesearch theme is fetched from the [fess-themes](https://github.com/codelibs/fess-themes) repository by `setup.sh` (re-fetched on every run; set `FESS_THEMES_SKIP_FETCH=1` to keep the local copy) and stored in `data/fess/themes/codesearch/`. This directory is mounted into the container at `/usr/share/fess/app/themes/codesearch`. The theme requires the facet fields configured in the overlay — see [Troubleshooting](#troubleshooting).
 - **index.filetype**: Source-code aware mimetype→label map, maintained in `conf/fess_config.overlay.properties` (a multi-line value, so it lives in the file rather than a `-D` flag). The `filetype` value behind the language facet and the `filetype:` filter comes from this map, so `.js` / `.mjs` files are labelled `javascript` and `.yml` / `.yaml` files `yaml`. Rust (`.rs`) files are labelled `rust`: Tika detects them as `application/rls-services+xml`, so that type is mapped to the label. TypeScript (`.ts` / `.tsx`), `.jsx`, `.cjs`, Vue, SCSS and TOML files are detected as `text/plain` and are therefore labelled `txt`, so `filetype:` cannot tell them apart.
 - **Management CLI (`fessctl`)**: Repositories are registered and crawls are triggered with [`fessctl`](https://github.com/codelibs/fessctl), the official Fess admin-API CLI (see [Install fessctl](#install-fessctl)).
 - **Verification (`bin/verify.sh`)**: Checks at runtime that the generated config is in effect and that the live index has the codesearch fields mapped. Run it after `setup.sh` and after any version bump (see [Verify the Setup](#verify-the-setup)).
@@ -34,7 +34,7 @@ $ bash ./bin/setup.sh
 `setup.sh` will:
 1. Create required data directories
 2. Download the Fess data store plugin (fess-ds-git)
-3. Fetch the codesearch static theme from fess-themes
+3. Fetch the codesearch theme from fess-themes
 4. Generate `data/fess/opt/fess/system.properties` from the template (if not already present)
 5. Generate `data/fess/opt/fess/fess_config.properties` from the pinned base + codesearch overlay
 

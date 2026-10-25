@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Prepare the bind-mounted data/ tree: plugins, the codesearch static theme,
+# Prepare the bind-mounted data/ tree: plugins, the codesearch theme,
 # system.properties and the generated fess_config.properties.
 #
 # Every step is fatal. A partially completed setup produces a Fess that boots
@@ -25,7 +25,7 @@ fess-ds-git:${FESS_DS_GIT_VERSION:-15.9.0}
 fess_plugin_repo_url="${FESS_PLUGIN_REPO_URL:-https://maven.codelibs.org/release}"
 fess_plugin_snapshot_repo_url="${FESS_PLUGIN_SNAPSHOT_REPO_URL:-https://maven.codelibs.org/snapshot}"
 
-# fess-themes branch to fetch the codesearch static theme from (default: main).
+# fess-themes branch to fetch the codesearch theme from (default: main).
 # Override with FESS_THEMES_BRANCH=<branch> to test theme changes from another branch.
 fess_themes_branch="${FESS_THEMES_BRANCH:-main}"
 
@@ -107,7 +107,7 @@ for existing in "${plugin_dir}"/fess-*.jar ; do
   esac
 done
 
-# Fetch the codesearch static theme from the fess-themes repo.
+# Fetch the codesearch theme from the fess-themes repo.
 if [ "${fess_themes_skip_fetch}" = "1" ] && [ -d "${base_dir}/data/fess/themes/codesearch" ]; then
   echo "Keeping the existing codesearch theme (FESS_THEMES_SKIP_FETCH=1)."
 else

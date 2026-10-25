@@ -21,7 +21,7 @@
 !/data/fess/opt/fess/system.properties.template
 
 # Legacy JSP theme overrides & static assets
-# (not mounted by compose; superseded by the fess-themes static theme)
+# (not mounted by compose; superseded by the fess-themes theme)
 /data/fess/usr/share/fess/app/WEB-INF/view/
 /data/fess/usr/share/fess/app/css/
 /data/fess/usr/share/fess/app/images/
