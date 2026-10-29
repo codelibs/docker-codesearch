@@ -25,9 +25,10 @@ fess-ds-git:${FESS_DS_GIT_VERSION:-15.9.0}
 fess_plugin_repo_url="${FESS_PLUGIN_REPO_URL:-https://maven.codelibs.org/release}"
 fess_plugin_snapshot_repo_url="${FESS_PLUGIN_SNAPSHOT_REPO_URL:-https://maven.codelibs.org/snapshot}"
 
-# fess-themes branch to fetch the codesearch static theme from (default: main).
+# fess-themes branch to fetch the codesearch static theme from (default: 15.9.x,
+# the branch that matches the Fess 15.9 pinned in .env; main follows Fess 15.10).
 # Override with FESS_THEMES_BRANCH=<branch> to test theme changes from another branch.
-fess_themes_branch="${FESS_THEMES_BRANCH:-main}"
+fess_themes_branch="${FESS_THEMES_BRANCH:-15.9.x}"
 
 # The theme is re-fetched on every run so it tracks the branch above. Set
 # FESS_THEMES_SKIP_FETCH=1 to keep the copy already in data/fess/themes
