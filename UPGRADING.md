@@ -2,6 +2,10 @@
 
 Steps for moving an existing Code Search deployment to a newer version. For a fresh install, see [README.md](README.md).
 
+## Upgrading from Fess 15.9 to 15.10
+
+OpenSearch moves from 3.9.0 to 3.10.0 (`OPENSEARCH_VERSION`). `docker compose pull` and `docker compose up -d` open the existing data volume as it is: the indices and the search results are unchanged, and no reindex or re-crawl is needed. A volume that 3.10.0 has opened cannot be opened by 3.9.0 again, so copy the volume first if you may need to go back.
+
 ## Upgrading from Fess 15.8 to 15.9
 
 Fess 15.9 moved the Groovy script engine out of core into the `fess-script-groovy` plugin and made JavaScript the default script type. An upgrade does not rewrite stored settings, so a 15.8 install keeps Groovy on all of its scheduled jobs, and the data configs `register_github.sh` created on 15.8 carry no `script_type` — which also means Groovy. This deployment does not install `fess-script-groovy` (the `WEB-INF/plugin` bind mount hides the copy baked into the image, and `setup.sh` removes plugin jars it did not download), so on 15.9 those settings cannot run: the Default Crawler ends with `fail`, and `fess.log` shows `Settings use the script engine groovy, which is not registered` at startup and `groovy is not found` per job.
